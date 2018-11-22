@@ -1,0 +1,26 @@
+SESSION:
+- session.params
+- sid (length - 250)
+- anti-hijacking
+- input-field
+- flash
+- old
+- csrf
+- encrypt 
+- token cookie
+(on top of aura session)
+
+DI:
+- try league/container
+
+dev:
+- debugbar
+
+- tactician
+
+* Convert functions to classes
+
+
+
+
+

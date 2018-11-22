@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>{% block title %} {% endblock title %}</title>
+        <!-- Required meta tags -->
+        <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, shrink-to-fit=no"
+        />
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="/css/app.css" />
+        {% block styles %} {% endblock styles %}
+    </head>
+    <body>
+        <div id="app">
+            {% include "sections/navbar.html.twig" %}
+            <div class="container">
+                {% include "sections/alert.html.twig" %}
+                <div class="card">
+                    <div class="card">
+                        <div class="card-header">
+                            {% block cardheader %} {% endblock cardheader %}
+                        </div>
+                        <div class="card-body">
+                            <h4 class="card-title">
+                                {% block cardtitle %} {% endblock cardtitle %}
+                            </h4>
+                            {% block content %} {% endblock content %}
+                        </div>
+                        <div class="card-footer text-muted">
+                            {% block cardfooter %} {% endblock cardfooter %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer>
+                <small class="text-center">
+                    <p class="mt-3">&copy; {{ "now"|date("Y") }}.</p>
+                    <p>
+                        <span class="badge badge-pill badge-primary"
+                            >Mem: {{ convert(mem_usage(true)) }}</span
+                        >
+                        <span class="badge badge-pill badge-info">
+                            Time: {{ responsetime() }} ms
+                        </span>
+                    </p>
+                </small>
+            </footer>
+        </div>
+        <!-- Optional JavaScript -->
+        <script src="/js/app.js"></script>
+        {% block scripts %} {% endblock scripts %}
+    </body>
+</html>

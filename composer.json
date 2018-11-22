@@ -1,0 +1,58 @@
+{
+    "name": "d0np0br3/phpferdie",
+    "description": "A PHP Web Application Skeleton",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ferdinand Saporas Bergado",
+            "email": "ferdiebergado@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "FSB\\": "src\\",
+            "App\\": "app\\"
+        },
+        "files": [
+            "src/functions.php"
+        ]
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "security-checker security:check ./composer.lock"
+        ],
+        "serve": [
+            "php -S localhost:8000 -t public public/index.php"
+        ]
+    },
+    "config": {
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "optimize-autoloader": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require-dev": {
+        "filp/whoops": "^2.3",
+        "maximebf/debugbar": "^1.15",
+        "phpunit/phpunit": "^7.4"
+    },
+    "require": {
+        "http-interop/response-sender": "^1.0",
+        "illuminate/database": "^5.7",
+        "league/tactician": "^1.0",
+        "league/tactician-container": "^2.0",
+        "middlewares/aura-session": "^1.1",
+        "middlewares/fast-route": "^1.2",
+        "middlewares/negotiation": "^1.1",
+        "middlewares/request-handler": "^1.4",
+        "northwoods/broker": "^3.0",
+        "nyholm/psr7": "^1.0",
+        "nyholm/psr7-server": "^0.3.0",
+        "php-di/php-di": "^6.0",
+        "twig/twig": "^2.5",
+        "vlucas/phpdotenv": "^2.5",
+        "vlucas/valitron": "^1.4"
+    }
+}

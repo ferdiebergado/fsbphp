@@ -1,0 +1,49 @@
+{% extends "layouts/master.html.twig" %} {% block title %} Login {% endblock
+title %} {% block cardheader %} Login {% endblock cardheader %} {% block
+cardtitle %} Login {% endblock cardtitle %} {% block content %}
+
+<form class="data-form" method="POST" action="/login" role="form">
+    <div class="form-group">
+        <label for="email">Email address</label>
+        <input
+            type="email"
+            class="form-control {{ (session.get('errors')['email'] is defined) ? 'is-invalid' : '' }}"
+            id="email"
+            name="email"
+            aria-describedby="emailHelp"
+            placeholder="Enter email"
+            required
+            autofocus
+        />
+        {% if session.get('errors')['email'] is defined %}
+        <small id="emailHelp" class="form-text text-danger">{{
+            session.get("errors")["email"][0]
+        }}</small>
+        {% endif %}
+    </div>
+    <div class="form-group">
+        <label for="password">Password</label>
+        <input
+            type="password"
+            class="form-control {{ (session.get('errors')['password'] is defined) ? 'is-invalid' : '' }}"
+            id="password"
+            name="password"
+            placeholder="Password"
+            required
+            autocomplete="off"
+        />
+        {% if session.get('errors')['password'] is defined %}
+        <small id="emailHelp" class="form-text text-danger">{{
+            session.get("errors")["password"][0]
+        }}</small>
+        {% endif %}
+    </div>
+    <div class="form-group form-check">
+        <input type="checkbox" class="form-check-input" id="exampleCheck1" />
+        <label class="form-check-label" for="exampleCheck1">Check me out</label>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+    {{ csrf | raw }}
+</form>
+
+{% endblock content %}
