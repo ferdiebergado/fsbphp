@@ -17,4 +17,9 @@ class TwigTemplate implements TemplateInterface
     {
         return $this->template->render($view, $data);
     }
+
+    public function addGlobal($name, $value)
+    {
+        return $this->template->addGlobal($name, $value);
+    }
 }

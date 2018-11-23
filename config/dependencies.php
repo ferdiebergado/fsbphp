@@ -7,22 +7,18 @@ use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Middlewares \{
-    FastRoute, ContentType, RequestHandler
+    ContentType
 };
 use App\Controller \{
     HomeController, LoginController, UserController
 };
 use FSB\Middleware \{
-    HeadersMiddleware, SessionMiddleware, VerifyCsrfTokenMiddleware, AuraSessionMiddleware, AuthMiddleware
-};
-use FSB\Session \{
-    Session, SessionHelper
+    HeadersMiddleware
 };
 use FSB\Container;
 use App\View\Template\Twig\TwigTemplate;
 use App\View\Template\TemplateInterface;
 use App\View\Template\Twig\Extension\AppTwigExtension;
-use Aura\Session\SessionFactory;
 use Northwoods\Broker\Broker;
 use Psr\Container\ContainerInterface;
 use League\Tactician\Container\ContainerLocator;
@@ -32,11 +28,16 @@ use League\Tactician\CommandBus;
 use League\Tactician\Handler\CommandNameExtractor\ClassNameExtractor;
 use App\Handler\LogoutHandler;
 use Valitron\Validator;
+use League\Route\Strategy\ApplicationStrategy;
+use League\Route\Router as LeagueRouter;
+use FSB\Middleware\RouterMiddleware;
+use Zend\Expressive\Session\SessionMiddleware;
+use Zend\Expressive\Session\Ext\PhpSessionPersistence;
 
-$router = require(CONFIG_PATH . 'router.php');
-$session = require(CONFIG_PATH . 'session.php');
+// $router = require(CONFIG_PATH . 'router.php');
+// $session = require(CONFIG_PATH . 'session.php');
 $view = require(CONFIG_PATH . 'view.php');
-$authroutes = require(CONFIG_PATH . 'auth.php');
+// $authroutes = require(CONFIG_PATH . 'auth.php');
 $handlermap = require(CONFIG_PATH . 'handlers.php');
 
 return [
@@ -50,25 +51,36 @@ return [
     },
     Broker::class => create(),
     'dispatcher' => get(Broker::class),
-    FastRoute::class => create()->constructor($router, get('psr17factory')),
-    'router' => get(FastRoute::class),
+    ApplicationStrategy::class => create()->method('setContainer', get('container')),
+    'strategy' => get(ApplicationStrategy::class),
+    LeagueRouter::class => create()->method('setStrategy', get('strategy')),
+    'leaguerouter' => get(LeagueRouter::class),
+    'router' => function (ContainerInterface $c) {
+        $namespace = "App\\Controller\\";
+        $router = $c->get('leaguerouter');
+        $routes = include(CONFIG_PATH . 'routes.php');
+        foreach ($routes as $route) {
+            $router->map($route[0], $route[1], $namespace . $route[2][0] . '::' . $route[2][1]);
+        }
+        return $router;
+    },
+    // FastRoute::class => create()->constructor($router, get('psr17factory')),
+    // 'router' => get(FastRoute::class),
     // SessionMiddleware::class => create()->constructor($session['name'], $session['cookie_lifetime'], $session['save_path'], null, null),
+    RouterMiddleware::class => create()->constructor(get('router'), get('psr17factory')),
+    'mw_router' => get(RouterMiddleware::class),
+    PhpSessionPersistence::class => create(),
+    'session_persistence' => get(PhpSessionPersistence::class),
+    SessionMiddleware::class => create()->constructor(get('session_persistence')),
+    'session' => get(SessionMiddleware::class),
     HeadersMiddleware::class => create(),
     'headers' => get(HeadersMiddleware::class),
-    SessionFactory::class => create(),
-    'sessionfactory' => get(SessionFactory::class),
-    Session::class => create()->constructor(get('sessionfactory')),
-    'session' => get(Session::class),
-    RequestHandler::class => create()->constructor(get('container')),
-    'requesthandler' => get(RequestHandler::class),
     ContentType::class => create(),
     'content-type' => get(ContentType::class),
-    AuraSessionMiddleware::class => create()->constructor(get('sessionfactory'), $session)->method('name', $session['name']),
-    'mw_session' => get(AuraSessionMiddleware::class),
-    VerifyCsrfTokenMiddleware::class => create()->constructor(get('psr17factory')),
-    'csrf' => get(VerifyCsrfTokenMiddleware::class),
-    AuthMiddleware::class => create()->constructor(get('psr17factory'), $authroutes),
-    'auth' => get(AuthMiddleware::class),
+
+    // AuraSessionMiddleware::class => create()->constructor(get('sessionfactory'), $session)->method('name', $session['name']),
+    // AuthMiddleware::class => create()->constructor(get('psr17factory'), $authroutes),
+    // 'auth' => get(AuthMiddleware::class),
     Container::class => create(),
     'container' => get(Container::class),
     ClassNameExtractor::class => create(),
@@ -88,7 +100,7 @@ return [
     TwigTemplate::class => create()->constructor(get('twig')),
     TemplateInterface::class => get(TwigTemplate::class),
     'template' => get(TemplateInterface::class),
-    AppTwigExtension::class => create()->constructor(get('session')),
+    AppTwigExtension::class => create(),
     'apptwigext' => get(AppTwigExtension::class),
     Validator::class => create()->constructor($_POST),
     'validator' => get(Validator::class),

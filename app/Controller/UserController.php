@@ -9,9 +9,11 @@ use Psr\Http\Message \{
 
 class UserController extends Controller
 {
-    public function show(ServerRequestInterface $request) : ResponseInterface
+    public function show(ServerRequestInterface $request, array $params) : ResponseInterface
     {
-        $data = User::find($request->getAttribute('user'));
+        $data = User::find($params['user']);
+        $session = $request->getAttribute('session');
+        $this->template->addGlobal('session', $session);
         return $this->view("home", compact('data'));
     }
 }

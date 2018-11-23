@@ -6,7 +6,6 @@ use Psr\Http\Message \{
     ResponseInterface, ServerRequestInterface
 };
 use App\Model\User;
-use FSB\Session\SessionHelper;
 use App\Command\LogoutCommand;
 
 class LoginController extends Controller
@@ -18,9 +17,9 @@ class LoginController extends Controller
 
     public function login(ServerRequestInterface $request) : ResponseInterface
     {
-        $session = new SessionHelper($request);
+        $session = $request->getAttribute('session');
         $body = $request->getParsedBody();
-        $session->set('old', $body);
+        // $session->set('old', $body);
         $this->validator
             ->rule('required', ['email', 'password'])
             ->rule('email', 'email')
@@ -30,7 +29,7 @@ class LoginController extends Controller
             $errors = $this->validator->errors();
             $statuscode = 403;
             $session->set('errors', $errors);
-            $session->flash('error', $invalid);
+            // $session->flash('error', $invalid);
             return $this->response->withStatus($statuscode)->withHeader('Location', $request->getUri()->getPath());
         }
         $error = 'Invalid username or password.';
@@ -44,21 +43,22 @@ class LoginController extends Controller
                 }
                 // cache_remember('user_' . $user['id'], 30, $authuser);
                 $user->update(['last_login' => date('Y-m-d H:i:s')]);
-                $session->regenerateId();
+                $session->regenerate();
                 $session->set('user', $user);
-                $session->flash('status', 'You are now logged in!');
+                // $session->flash('status', 'You are now logged in!');
                 return $this->response->withHeader('Location', '/');
             }
         }
         $statuscode = 401;
         $session->set('errors', ['email' => [0 => $error]]);
-        $session->flash('error', $invalid);
+        // $session->flash('error', $invalid);
+        $this->template->addGlobal('session', $session);
         return $this->response->withStatus($statuscode)->withHeader('Location', $request->getUri()->getPath());
     }
 
     public function logout(ServerRequestInterface $request) : ResponseInterface
     {
-        $session = new SessionHelper($request);
+        $session = $request->getAttribute('session');
         $logout = new LogoutCommand($session);
         $this->commandBus->handle($logout);
         return $this->response->withHeader('Location', '/');

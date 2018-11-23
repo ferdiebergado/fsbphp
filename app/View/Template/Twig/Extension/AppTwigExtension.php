@@ -2,22 +2,12 @@
 
 namespace App\View\Template\Twig\Extension;
 
-use FSB\Session\Session;
-
 class AppTwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsInterface
 {
-    protected $session;
-
-    public function __construct(Session $session)
-    {
-        $this->session = $session;
-    }
-
     public function getGlobals()
     {
         return array(
-            'session' => $this->session->getSegment(),
-            'csrf' => $this->session->getCsrfField(),
+            'csrf' => '',
         );
     }
 
