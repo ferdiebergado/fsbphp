@@ -18,13 +18,14 @@ class LoginController extends Controller
 
     public function login(ServerRequestInterface $request) : ResponseInterface
     {
+        $session = new SessionHelper($request);
         $body = $request->getParsedBody();
+        $session->set('old', $body);
         $this->validator
             ->rule('required', ['email', 'password'])
             ->rule('email', 'email')
             ->rule('lengthMin', 'password', 8);
         $invalid = "Invalid input.";
-        $session = new SessionHelper($request);
         if (!$this->validator->validate()) {
             $errors = $this->validator->errors();
             $statuscode = 403;

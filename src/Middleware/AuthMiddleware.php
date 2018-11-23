@@ -26,16 +26,10 @@ class AuthMiddleware extends Middleware implements MiddlewareInterface
     {
         $base_uri = explode('/', $request->getUri()->getPath());
         $uri = $base_uri[1];
-        // $user = null;
 
-        // $session = new SessionHelper($request);
-
-        // $user = $session->get('user');
-
-        $session = $request->getAttribute('session');
-        $segment = $session->getSegment('FSB');
-        $user = $segment->get('user');
         if (in_array($uri, $this->guarded)) {
+            $session = new SessionHelper($request);
+            $user = $session->get('user');
             if (null === $user) {
                 $redirectPath = '/' . $this->redirectPath;
                 $statuscode = $this->statusCode;
@@ -44,9 +38,9 @@ class AuthMiddleware extends Middleware implements MiddlewareInterface
             }
         }
 
-        if ($uri === $this->redirectPath && null !== $user) {
-            return $this->response->withHeader('Location', '/');
-        }
+        // if ($uri === $this->redirectPath && null !== $user) {
+        //     return $this->response->withHeader('Location', '/');
+        // }
 
         return $handler->handle($request);
     }

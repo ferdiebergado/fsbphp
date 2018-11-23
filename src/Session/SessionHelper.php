@@ -14,13 +14,17 @@ class SessionHelper
     protected $segment;
     protected $request;
     public $csrf;
+    protected $body;
+    protected $old;
 
     public function __construct(ServerRequestInterface $request)
     {
         $this->request = $request;
+        $this->body = $request->getParsedBody();
         $this->setSession();
         $this->setSegment();
         $this->setCsrf();
+        $this->setOldFields();
     }
 
     protected function setSession() : self
@@ -74,6 +78,17 @@ class SessionHelper
     public function get(string $key, $default = null)
     {
         return $this->segment->get($key, $default);
+    }
+
+    public function setOldFields() : self
+    {
+        $this->old = $this->segment->set('old', $this->body);
+        return $this;
+    }
+
+    public function old(string $key) : string
+    {
+        return $this->old[$key];
     }
 
     public function __call($method, $args) : void

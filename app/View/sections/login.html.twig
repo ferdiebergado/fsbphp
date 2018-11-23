@@ -4,7 +4,7 @@ cardtitle %} Login {% endblock cardtitle %} {% block content %}
 
 <form class="data-form" method="POST" action="/login" role="form">
     <div class="form-group">
-        <label for="email">Email address</label>
+        <label for="email">Email</label>
         <input
             type="email"
             class="form-control {{ (session.get('errors')['email'] is defined) ? 'is-invalid' : '' }}"
@@ -12,11 +12,12 @@ cardtitle %} Login {% endblock cardtitle %} {% block content %}
             name="email"
             aria-describedby="emailHelp"
             placeholder="Enter email"
+            value="{{ session.get('old')['email'] | default('') }}"
             required
             autofocus
         />
         {% if session.get('errors')['email'] is defined %}
-        <small id="emailHelp" class="form-text text-danger">{{
+        <small class="form-text text-danger">{{
             session.get("errors")["email"][0]
         }}</small>
         {% endif %}
@@ -33,7 +34,7 @@ cardtitle %} Login {% endblock cardtitle %} {% block content %}
             autocomplete="off"
         />
         {% if session.get('errors')['password'] is defined %}
-        <small id="emailHelp" class="form-text text-danger">{{
+        <small class="form-text text-danger">{{
             session.get("errors")["password"][0]
         }}</small>
         {% endif %}
