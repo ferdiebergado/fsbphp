@@ -7,7 +7,7 @@ use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Middlewares \{
-    FastRoute, ContentType, RequestHandler
+    ContentType
 };
 use App\Controller \{
     HomeController, LoginController, UserController
@@ -32,6 +32,8 @@ use League\Tactician\CommandBus;
 use League\Tactician\Handler\CommandNameExtractor\ClassNameExtractor;
 use App\Handler\LogoutHandler;
 use Valitron\Validator;
+use FSB\Middleware\RouterMiddleware;
+use League\Route\Router as LeagueRouter;
 
 $router = require(CONFIG_PATH . 'router.php');
 $session = require(CONFIG_PATH . 'session.php');
@@ -50,8 +52,9 @@ return [
     },
     Broker::class => create(),
     'dispatcher' => get(Broker::class),
-    FastRoute::class => create()->constructor($router, get('psr17factory')),
-    'router' => get(FastRoute::class),
+    LeagueRouter::class => create(),
+    'router' => get(LeagueRouter::class),
+    RouterMiddleware::class => create()->constructor(),
     // SessionMiddleware::class => create()->constructor($session['name'], $session['cookie_lifetime'], $session['save_path'], null, null),
     HeadersMiddleware::class => create(),
     'headers' => get(HeadersMiddleware::class),
@@ -59,8 +62,6 @@ return [
     'sessionfactory' => get(SessionFactory::class),
     Session::class => create()->constructor(get('sessionfactory')),
     'session' => get(Session::class),
-    RequestHandler::class => create()->constructor(get('container')),
-    'requesthandler' => get(RequestHandler::class),
     ContentType::class => create(),
     'content-type' => get(ContentType::class),
     AuraSessionMiddleware::class => create()->constructor(get('sessionfactory'), $session)->method('name', $session['name']),

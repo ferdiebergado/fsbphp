@@ -1,5 +1,8 @@
 <?php
 
+$container = new FSB\Container();
+$router = $container->get('router');
+
 /* Create the router dispatcher */
 return Fastroute\cachedDispatcher(function (Fastroute\RouteCollector $r) {
     $namespace = "App\\Controller\\";
