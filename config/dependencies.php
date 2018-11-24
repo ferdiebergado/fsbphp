@@ -13,7 +13,7 @@ use App\Controller \{
     HomeController, LoginController, UserController
 };
 use FSB\Middleware \{
-    HeadersMiddleware, SessionMiddleware, VerifyCsrfTokenMiddleware, AuraSessionMiddleware, AuthMiddleware
+    HeadersMiddleware, VerifyCsrfTokenMiddleware, AuraSessionMiddleware, AuthMiddleware, GuestMiddleware
 };
 use FSB\Session \{
     Session, SessionHelper
@@ -33,12 +33,13 @@ use League\Tactician\Handler\CommandNameExtractor\ClassNameExtractor;
 use App\Handler\LogoutHandler;
 use Valitron\Validator;
 use FSB\Middleware\RouterMiddleware;
+use League\Route\Strategy\ApplicationStrategy;
 use League\Route\Router as LeagueRouter;
 
-$router = require(CONFIG_PATH . 'router.php');
+// $router = require(CONFIG_PATH . 'router.php');
 $session = require(CONFIG_PATH . 'session.php');
 $view = require(CONFIG_PATH . 'view.php');
-$authroutes = require(CONFIG_PATH . 'auth.php');
+// $authroutes = require(CONFIG_PATH . 'auth.php');
 $handlermap = require(CONFIG_PATH . 'handlers.php');
 
 return [
@@ -52,9 +53,20 @@ return [
     },
     Broker::class => create(),
     'dispatcher' => get(Broker::class),
-    LeagueRouter::class => create(),
+    ApplicationStrategy::class => create()->method('setContainer', get('container')),
+    'strategy' => get(ApplicationStrategy::class),
+    LeagueRouter::class => create()->method('setStrategy', get('strategy')),
     'router' => get(LeagueRouter::class),
-    RouterMiddleware::class => create()->constructor(),
+    'routes' => function (ContainerInterface $c) {
+        $router = $c->get('router');
+        $routes = include(CONFIG_PATH . 'routes.php');
+        // foreach ($routes as $route) {
+        //     $router->map($route[0], $route[1], $namespace . $route[2][0] . '::' . $route[2][1]);
+        // }
+        return $router;
+    },
+    RouterMiddleware::class => create()->constructor(get('routes'), get('psr17factory')),
+    'mw_router' => get(RouterMiddleware::class),
     // SessionMiddleware::class => create()->constructor($session['name'], $session['cookie_lifetime'], $session['save_path'], null, null),
     HeadersMiddleware::class => create(),
     'headers' => get(HeadersMiddleware::class),
@@ -68,8 +80,10 @@ return [
     'mw_session' => get(AuraSessionMiddleware::class),
     VerifyCsrfTokenMiddleware::class => create()->constructor(get('psr17factory')),
     'csrf' => get(VerifyCsrfTokenMiddleware::class),
-    AuthMiddleware::class => create()->constructor(get('psr17factory'), $authroutes),
+    AuthMiddleware::class => create()->constructor(get('psr17factory')),
     'auth' => get(AuthMiddleware::class),
+    GuestMiddleware::class => create()->constructor(get('psr17factory')),
+    'guest' => get(GuestMiddleware::class),
     Container::class => create(),
     'container' => get(Container::class),
     ClassNameExtractor::class => create(),

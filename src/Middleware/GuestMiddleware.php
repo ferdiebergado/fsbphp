@@ -10,10 +10,10 @@ use Psr\Http\Server \{
     MiddlewareInterface, RequestHandlerInterface
 };
 
-class AuthMiddleware extends Middleware implements MiddlewareInterface
+class GuestMiddleware extends Middleware implements MiddlewareInterface
 {
-    protected $statusCode = '401';
-    protected $redirectPath = '/login';
+    protected $statusCode = '301';
+    protected $redirectPath = '/';
 
     public function __construct(ResponseFactoryInterface $responseFactory)
     {
@@ -24,9 +24,11 @@ class AuthMiddleware extends Middleware implements MiddlewareInterface
     {
         $session = new SessionHelper($request);
         $user = $session->get('user');
-        if (null === $user) {
+        if (null !== $user) {
             return $this->response->withStatus($this->statusCode)->withHeader('Location', $this->redirectPath);
         }
+
+        // $request = $request->withAttribute('session', $session->getSession());
 
         return $handler->handle($request);
     }

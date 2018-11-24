@@ -19,9 +19,6 @@
         ]
     },
     "scripts": {
-        "post-autoload-dump": [
-            "security-checker security:check ./composer.lock"
-        ],
         "serve": [
             "php -S localhost:8000 -t public public/index.php"
         ]
@@ -34,13 +31,14 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require-dev": {
-        "filp/whoops": "^2.3",
-        "maximebf/debugbar": "^1.15",
-        "phpunit/phpunit": "^7.4"
+        "phpunit/phpunit": "^7.4",
+        "roave/security-advisories": "dev-master"
     },
     "require": {
+        "filp/whoops": "^2.3",
         "http-interop/response-sender": "^1.0",
         "illuminate/database": "^5.7",
+        "league/route": "^4.2",
         "league/tactician": "^1.0",
         "league/tactician-container": "^2.0",
         "middlewares/aura-session": "^1.1",
