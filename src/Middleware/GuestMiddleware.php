@@ -22,14 +22,13 @@ class GuestMiddleware extends Middleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface
     {
+        $response = $handler->handle($request);
         $session = new SessionHelper($request);
         $user = $session->get('user');
         if (null !== $user) {
-            return $this->response->withStatus($this->statusCode)->withHeader('Location', $this->redirectPath);
+            return $response->withStatus($this->statusCode)->withHeader('Location', $this->redirectPath);
         }
 
-        // $request = $request->withAttribute('session', $session->getSession());
-
-        return $handler->handle($request);
+        return $response;
     }
 }

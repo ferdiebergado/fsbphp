@@ -2,6 +2,16 @@
 
 namespace App\Command;
 
-class LoginCommand extends Command
+use FSB\Session\SessionHelper;
+
+class LoginCommand
 {
+    public $session;
+    public $body;
+
+    public function __construct(SessionHelper $session, array $body)
+    {
+        $this->session = $session;
+        $this->body = $body;
+    }
 }

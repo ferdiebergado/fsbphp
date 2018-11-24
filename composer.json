@@ -43,7 +43,6 @@
         "league/tactician-container": "^2.0",
         "middlewares/aura-session": "^1.1",
         "middlewares/negotiation": "^1.1",
-        "northwoods/broker": "^3.0",
         "nyholm/psr7": "^1.0",
         "nyholm/psr7-server": "^0.3.0",
         "php-di/php-di": "^6.0",

@@ -22,12 +22,13 @@ class AuthMiddleware extends Middleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface
     {
+        $response = $handler->handle($request);
         $session = new SessionHelper($request);
         $user = $session->get('user');
         if (null === $user) {
-            return $this->response->withStatus($this->statusCode)->withHeader('Location', $this->redirectPath);
+            return $response->withStatus($this->statusCode)->withHeader('Location', $this->redirectPath);
         }
 
-        return $handler->handle($request);
+        return $response;
     }
 }

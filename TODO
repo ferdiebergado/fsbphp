@@ -8,18 +8,19 @@ SESSION:
 - csrf
 - encrypt 
 - token cookie
-(on top of aura session)
+(on top of aura session)[DONE!]
 
 DI:
-- try league/container
+- try league/container (REJECTED!: no lazing loading)
 
 dev:
-- debugbar
+- debugbar (REJECTED!)
 
-- tactician
+- tactician (DONE!)
 
 * Convert functions to classes
 
+* redirect response 
 
 
 

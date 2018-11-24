@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "20a9dc98fddaed54dfe012d1d1eeb374",
+    "content-hash": "ef5ac6751918f8acadb307886a2eaf8e",
     "packages": [
         {
             "name": "aura/session",
@@ -981,64 +981,6 @@
                 "php"
             ],
             "time": "2018-10-10T09:24:14+00:00"
-        },
-        {
-            "name": "northwoods/broker",
-            "version": "3.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/northwoods/broker.git",
-                "reference": "5866b4a84e838bc9871c399bddda1250e83425e9"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/northwoods/broker/zipball/5866b4a84e838bc9871c399bddda1250e83425e9",
-                "reference": "5866b4a84e838bc9871c399bddda1250e83425e9",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.1",
-                "psr/http-server-middleware": "^1.0"
-            },
-            "require-dev": {
-                "eloquent/phony-phpunit": "^4.0",
-                "eloquent/phpstan-phony": "^0.3.0",
-                "phpstan/phpstan": "^0.10.3",
-                "phpstan/phpstan-phpunit": "^0.10.0",
-                "phpunit/phpunit": "^7.3",
-                "squizlabs/php_codesniffer": "^3.3"
-            },
-            "suggest": {
-                "northwoods/conditional-middleware": "Execute middleware based on request conditions",
-                "northwoods/lazy-middleware": "Lazy load middleware from a container"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Northwoods\\Broker\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Woody Gilk",
-                    "email": "woody.gilk@gmail.com"
-                }
-            ],
-            "description": "Dead simple PSR-15 middleware dispatcher",
-            "keywords": [
-                "dispatch",
-                "dispatcher",
-                "http",
-                "middleware",
-                "psr-15",
-                "psr15",
-                "server"
-            ],
-            "time": "2018-10-17T16:10:39+00:00"
         },
         {
             "name": "nyholm/psr7",

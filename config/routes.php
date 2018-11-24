@@ -10,4 +10,3 @@ $router->post('/logout', $namespace . 'LoginController::logout')
     ->middleware($c->get('auth'))
     ->middleware($c->get('csrf'));
 $router->get('/users/{user}', $namespace . 'UserController::show')->middleware($c->get('auth'));
-

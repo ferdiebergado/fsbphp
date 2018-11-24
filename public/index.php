@@ -27,27 +27,16 @@ $whoops->pushHandler(new Whoops\Handler\PrettyPageHandler);
 $whoops->register();
 // }
 
-/* Dispatch the middlewares */
-$container = new FSB\Container();
-$request = $container->get('request');
-$dispatcher = $container->get('dispatcher');
-$middlewares = require(CONFIG_PATH . 'middleware.php');
-foreach ($middlewares as $m) {
-    $dispatcher->append($m);
-}
+$c = new FSB\Container();
+$request = $c->get('request');
+$router = $c->get('router');
+$router
+    ->middleware($c->get('mw_session'))
+    ->middleware($c->get('content-type'))
+    ->middleware($c->get('headers'));
+
+$routes = include(CONFIG_PATH . 'routes.php');
 
 /* Send the response to the client */
-$response = $dispatcher->handle($request);
-$status = $response->getStatusCode();
-$errors = [
-    '404',
-    '405'
-];
-if (in_array($status, $errors)) {
-    $err_view_path = "errors/";
-    $viewfile = "{$err_view_path}404";
-    $template = $container->get('template');
-    $view = $template->render($viewfile . ".html.twig", array());
-    $response->getBody()->write($view);
-}
+$response = $router->dispatch($request);
 return Http\Response\send($response);

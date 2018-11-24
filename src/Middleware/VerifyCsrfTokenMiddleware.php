@@ -12,11 +12,6 @@ use FSB\Session\SessionHelper;
 
 class VerifyCsrfTokenMiddleware extends Middleware implements MiddlewareInterface
 {
-    // protected $unsafe = [
-    //     'POST',
-    //     'PUT',
-    //     'DELETE'
-    // ];
     protected $csrf_error = "Token Mismatch.";
     protected $csrf_statuscode = "401";
 
@@ -26,8 +21,6 @@ class VerifyCsrfTokenMiddleware extends Middleware implements MiddlewareInterfac
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface
     {
-        // $method = $request->getMethod();
-        // if (in_array($method, $this->unsafe)) {
         $body = $request->getParsedBody();
         $session = new SessionHelper($request);
         if (array_key_exists('__csrf_value', $body)) {
@@ -39,7 +32,5 @@ class VerifyCsrfTokenMiddleware extends Middleware implements MiddlewareInterfac
         }
         $session->flash('error', $this->csrf_error);
         return $this->response->withStatus($this->csrf_statuscode)->withHeader('Location', $request->getUri()->getPath());
-        // }
-        // return $handler->handle($request);
     }
 }
