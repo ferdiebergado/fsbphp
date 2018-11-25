@@ -7,8 +7,9 @@ use Psr\Http\Message \{
 };
 use App\Model\User;
 use FSB\Session\SessionHelper;
-use App\Command\LogoutCommand;
-use App\Command\LoginCommand;
+use App\Command \{
+    LogoutCommand, LoginCommand
+};
 
 class LoginController extends Controller
 {
@@ -20,8 +21,10 @@ class LoginController extends Controller
     public function login(ServerRequestInterface $request) : ResponseInterface
     {
         $session = new SessionHelper($request);
+        $redirectPath = $session->getFlash('REDIRECT_PATH');
+        // die(var_dump($redirectPath));
         $body = $request->getParsedBody();
-        $session->set('old', $body);
+        $session->flash('old', $body);
         $this->validator
             ->rule('required', ['email', 'password'])
             ->rule('email', 'email')
@@ -30,7 +33,7 @@ class LoginController extends Controller
         if (!$this->validator->validate()) {
             $errors = $this->validator->errors();
             $statuscode = 403;
-            $session->set('errors', $errors);
+            $session->flash('errors', $errors);
             $session->flash('error', $invalid);
             return $this->response->withStatus($statuscode)->withHeader('Location', $request->getUri()->getPath());
         }
@@ -39,7 +42,7 @@ class LoginController extends Controller
         $loggedIn = $this->commandBus->handle($login);
 
         if ($loggedIn) {
-            return $this->response->withHeader('Location', '/');
+            return $this->response->withHeader('Location', $redirectPath);
         }
 
         $statuscode = 401;

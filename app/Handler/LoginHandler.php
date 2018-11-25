@@ -28,8 +28,8 @@ class LoginHandler
             }
         }
         $error = "Invalid username or password";
-        $session->set('errors', ['email' => [0 => $error]]);
-        $session->flash('error', $invalid);
+        $session->flash('errors', ['email' => [0 => $error]]);
+        $session->flash('error', 'Invalid credentials.');
         return false;
     }
 }

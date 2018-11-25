@@ -7,35 +7,35 @@ cardtitle %} Login {% endblock cardtitle %} {% block content %}
         <label for="email">Email</label>
         <input
             type="email"
-            class="form-control {{ (session.get('errors')['email'] is defined) ? 'is-invalid' : '' }}"
+            class="form-control {{ (session.getFlash('errors')['email'] is defined) ? 'is-invalid' : '' }}"
             id="email"
             name="email"
             aria-describedby="emailHelp"
             placeholder="Enter email"
-            value="{{ session.get('old')['email'] | default('') }}"
+            value="{{ session.getFlash('old')['email'] | default('') }}"
             required
             autofocus
         />
-        {% if session.get('errors')['email'] is defined %}
-        <small class="form-text text-danger">{{
-            session.get("errors")["email"][0]
-        }}</small>
+        {% if session.getFlash('errors')['email'] is defined %}
+        <small class="form-text text-danger">
+            {{ session.getFlash("errors")["email"][0] }}
+        </small>
         {% endif %}
     </div>
     <div class="form-group">
         <label for="password">Password</label>
         <input
             type="password"
-            class="form-control {{ (session.get('errors')['password'] is defined) ? 'is-invalid' : '' }}"
+            class="form-control {{ (session.getFlash('errors')['password'] is defined) ? 'is-invalid' : '' }}"
             id="password"
             name="password"
             placeholder="Password"
             required
             autocomplete="off"
         />
-        {% if session.get('errors')['password'] is defined %}
+        {% if session.getFlash('errors')['password'] is defined %}
         <small class="form-text text-danger">{{
-            session.get("errors")["password"][0]
+            session.getFlash("errors")["password"][0]
         }}</small>
         {% endif %}
     </div>

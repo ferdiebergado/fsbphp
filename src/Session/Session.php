@@ -13,15 +13,12 @@ class Session
     protected $session;
     protected $segment;
     protected $csrf;
+    protected $config;
 
-    public function __construct(SessionFactory $sessionFactory)
+    public function __construct(SessionFactory $sessionFactory, array $config)
     {
         $this->sessionFactory = $sessionFactory;
-        // if (!$this->session->sessionStatus() === PHP_SESSION_NONE) {
-        //     $session->setSavePath($path);
-        //     $session->setCookieParams($cookies);
-        // }
-        // $segment = $session->getSegment($this->segmentname);
+        $this->config = $config;
         $this->setSession();
         $this->setSegment();
         $this->setCsrf();
@@ -30,6 +27,11 @@ class Session
     protected function setSession() : self
     {
         $this->session = $this->sessionFactory->newInstance($_COOKIE);
+        if (!$this->session->isStarted()) {
+            $this->session->setName($this->config['name']);
+            $this->session->setSavePath($this->config['save_path']);
+            $this->session->setCookieParams($this->config['cookie']);
+        }
         return $this;
     }
 

@@ -12,10 +12,4 @@ class HomeController extends Controller
         $data = "Welcome!";
         return $this->view("home", compact('data'));
     }
-
-    public function hello(ServerRequestInterface $request) : ResponseInterface
-    {
-        $data = "Hello " . $request->getAttribute('name');
-        return $this->view("home", compact('data'));
-    }
 }

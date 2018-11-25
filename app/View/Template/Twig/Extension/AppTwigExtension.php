@@ -3,22 +3,40 @@
 namespace App\View\Template\Twig\Extension;
 
 use FSB\Session\Session;
+use DebugBar\StandardDebugBar;
+use DebugBar\Bridge\Twig\TraceableTwigEnvironment;
+use Psr\Http\Message\ServerRequestInterface;
 
 class AppTwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsInterface
 {
     protected $session;
+    protected $request;
 
-    public function __construct(Session $session)
+    public function __construct(Session $session, ServerRequestInterface $request)
     {
         $this->session = $session;
+        $this->request = $request;
     }
 
     public function getGlobals()
     {
-        return array(
+        $globals = [
             'session' => $this->session->getSegment(),
             'csrf' => $this->session->getCsrfField(),
-        );
+        ];
+
+        if (DEBUG_MODE) {
+            $debugbar = new \DebugBar\StandardDebugBar();
+            $debugbarRenderer = $debugbar->getJavascriptRenderer();
+            $debugbarRenderer->setBaseUrl('/debugbar');
+            // $loader = new \Twig_Loader_Filesystem(VIEW_PATH);
+            // $view = require(CONFIG_PATH . 'view.php');
+            // $env = new \DebugBar\Bridge\Twig\TraceableTwigEnvironment(new \Twig_Environment($loader));
+            // $debugbar->addCollector(new \DebugBar\Bridge\Twig\TwigCollector($env));
+            $globals = array_merge($globals, ['debugbar' => $debugbarRenderer]);
+        }
+
+        return $globals;
     }
 
     public function getFunctions()

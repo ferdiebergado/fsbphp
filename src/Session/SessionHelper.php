@@ -30,10 +30,6 @@ class SessionHelper
     protected function setSession() : self
     {
         $this->session = $this->request->getAttribute($this->sessionHandler);
-        // $fsbsession = $this->request->getAttribute('fsbsession');
-        // if (isset($fsbsession)) {
-        //     $this->session = $fsbsession;
-        // }
         return $this;
     }
 
@@ -89,6 +85,21 @@ class SessionHelper
     public function old(string $key) : string
     {
         return $this->old[$key];
+    }
+
+    public function getFlash($key, $alt = null)
+    {
+        return $this->segment->getFlash($key, $alt);
+    }
+
+    public function getFlashNext($key, $alt = null)
+    {
+        return $this->segment->getFlashNext($key, $alt);
+    }
+
+    public function keepFlash() : void
+    {
+        $this->segment->keepFlash();
     }
 
     public function __call($method, $args) : void

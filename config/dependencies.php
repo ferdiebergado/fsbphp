@@ -70,7 +70,7 @@ return [
     /* Session */
     SessionFactory::class => create(),
     'sessionfactory' => get(SessionFactory::class),
-    Session::class => create()->constructor(get('sessionfactory')),
+    Session::class => create()->constructor(get('sessionfactory'), $session),
     'session' => get(Session::class),
     AuraSessionMiddleware::class => create()->constructor(get('sessionfactory'), $session)->method('name', $session['name']),
     'mw_session' => get(AuraSessionMiddleware::class),
@@ -88,7 +88,6 @@ return [
     'auth' => get(AuthMiddleware::class),
     GuestMiddleware::class => create()->constructor(get('psr17factory')),
     'guest' => get(GuestMiddleware::class),
-
 
     /* COMMAND BUS */
     ClassNameExtractor::class => create(),
@@ -110,13 +109,17 @@ return [
     TwigTemplate::class => create()->constructor(get('twig')),
     TemplateInterface::class => get(TwigTemplate::class),
     'template' => get(TemplateInterface::class),
-    AppTwigExtension::class => create()->constructor(get('session')),
+    AppTwigExtension::class => create()->constructor(get('session'), get('request')),
     'apptwigext' => get(AppTwigExtension::class),
 
     /* INPUT VALIDATOR */
     Validator::class => function (ContainerInterface $c) {
         $request = $c->get('request');
         $post = $request->getParsedBody();
+        foreach ($post as $key => $value) {
+            $post[$key] = test_input($post[$key]);
+            $post[$key] = filter_input(INPUT_POST, $key, FILTER_SANITIZE_STRING);
+        }
         return new Validator($post);
     },
     'validator' => get(Validator::class),
