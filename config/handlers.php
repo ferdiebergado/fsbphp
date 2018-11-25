@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * COMMAND BUS HANDLERS MAP
+ * @return array
+ */
+
 use App\Command\LogoutCommand;
 use App\Handler\LogoutHandler;
 use App\Command\LoginCommand;

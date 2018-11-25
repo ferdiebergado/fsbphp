@@ -4,7 +4,7 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-        <title>{{ title|default('Error 404: Page Not Found') }}</title>
+        <title>{{ title|default('An Error occcured.') }}</title>
 
         <!-- Fonts -->
         {#
@@ -74,10 +74,10 @@
         <div class="flex-center position-ref full-height">
             <div class="content">
                 <div class="jumbotron">
-                    <h1>Error 404</h1>
-                    <p class="lead">Page Not Found</p>
+                    <h1>Error {{ code }}</h1>
+                    <p class="lead">{{ message }}</p>
                     <hr class="my-2" />
-                    <p>The page does not exist/have been removed.</p>
+                    <p>Click the link below to go the Home page.</p>
                     <p class="lead">
                         <a class="btn btn-primary btn-lg" href="/" role="button"
                             >Home</a

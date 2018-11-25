@@ -13,16 +13,34 @@ use App\Command \{
 
 class LoginController extends Controller
 {
+    /**
+     * Show the Login form.
+     * 
+     * @uri string "/login"
+     * @method string "GET"
+     * 
+     * @var Psr\Http\Message\ServerRequestInterface $request
+     * 
+     * @return Psr\Http\Message\ResponseInterface
+     */
     public function show(ServerRequestInterface $request) : ResponseInterface
     {
         return $this->view("sections/login");
     }
 
+    /**
+     * Handle user login. 
+     * 
+     * @uri string "/login"
+     * @method string "POST"
+     * 
+     * @var Psr\Http\Message\ServerRequestInterface $request
+     * 
+     * @return Psr\Http\Message\ResponseInterface 
+     */
     public function login(ServerRequestInterface $request) : ResponseInterface
     {
         $session = new SessionHelper($request);
-        $redirectPath = $session->getFlash('REDIRECT_PATH');
-        // die(var_dump($redirectPath));
         $body = $request->getParsedBody();
         $session->flash('old', $body);
         $this->validator
@@ -42,13 +60,28 @@ class LoginController extends Controller
         $loggedIn = $this->commandBus->handle($login);
 
         if ($loggedIn) {
-            return $this->response->withHeader('Location', $redirectPath);
+            $redirectPath = $session->get('REDIRECT_PATH');
+            // if (null === $redirectPath && $redirectPath !== '/login') {
+            //     $redirectPath = '/';
+            // }
+            // $session->set('REDIRECT_PATH', null);
+            return $this->response->withHeader('Location', '/');
         }
 
         $statuscode = 401;
         return $this->response->withStatus($statuscode)->withHeader('Location', $request->getUri()->getPath());
     }
 
+    /**
+     * Logout.
+     * 
+     * @uri string "/logout"
+     * @method string "POST"
+     * 
+     * @var Psr\Http\Message\ServerRequestInterface $request
+     * 
+     * @return Psr\Http\Message\ResponseInterface 
+     */
     public function logout(ServerRequestInterface $request) : ResponseInterface
     {
         $session = new SessionHelper($request);

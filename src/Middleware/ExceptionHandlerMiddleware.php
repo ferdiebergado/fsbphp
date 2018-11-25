@@ -25,7 +25,10 @@ class ExceptionHandlerMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface
     {
-        $view = $this->view($this->viewfile, array());
+        $view = $this->view($this->viewfile, [
+            'code' => $this->exception->getStatusCode(),
+            'message' => $this->exception->getMessage()
+        ]);
         $headers = $this->exception->getHeaders();
         if (null !== $headers && is_array($headers)) {
             foreach ($headers as $key => $value) {

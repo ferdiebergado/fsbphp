@@ -24,9 +24,9 @@ class AuthMiddleware extends Middleware implements MiddlewareInterface
     {
         $response = $handler->handle($request);
         $session = new SessionHelper($request);
-        $session->set('REDIRECT_PATH', $request->getUri()->getPath());
         $user = $session->get('user');
         if (null === $user) {
+            // $session->set('REDIRECT_PATH', $request->getUri()->getPath());
             return $response->withStatus($this->statusCode)->withHeader('Location', $this->redirectPath);
         }
 

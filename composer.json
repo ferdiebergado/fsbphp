@@ -18,6 +18,11 @@
             "src/functions.php"
         ]
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
     "scripts": {
         "serve": [
             "php -S localhost:8000 -t public public/index.php"

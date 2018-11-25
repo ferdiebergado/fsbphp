@@ -1,12 +1,18 @@
 <?php
+
+/**
+ * SECURITY HEADERS
+ * @return array
+ */
+
 return [
     /*
-     * X-Content-Type-Options
-     *
-     * Reference: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
-     *
-     * Available Value: 'nosniff'
-     */
+ * X-Content-Type-Options
+ *
+ * Reference: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
+ *
+ * Available Value: 'nosniff'
+ */
 
     'X-Content-Type-Options' => 'nosniff',
 
