@@ -45,7 +45,7 @@ return [
     Container::class => create(),
     'container' => get(Container::class),
 
-    /*** PSR-7 HTTP MESSAGE IMPLEMENTATION **/
+    /* PSR-7 HTTP MESSAGE IMPLEMENTATION */
     Psr17Factory::class => create(),
     'psr17factory' => get(Psr17Factory::class),
     ServerRequestCreator::class => create()->constructor(get('psr17factory'), get('psr17factory'), get('psr17factory'), get('psr17factory')),
@@ -55,13 +55,13 @@ return [
         return $serverrequest->fromGlobals();
     },
 
-    /*** ROUTER/PSR-15 REQUEST HANDLER **/
+    /* ROUTER/PSR-15 REQUEST HANDLER */
     FSBApplicationStrategy::class => create()->method('setContainer', get('container')),
     'strategy' => get(FSBApplicationStrategy::class),
     Router::class => create()->method('setStrategy', get('strategy')),
     'router' => get(Router::class),
 
-    /*** MIDDLEWARES **/
+    /* MIDDLEWARES */
 
     /* Headers */
     HeadersMiddleware::class => create(),
@@ -89,7 +89,7 @@ return [
     GuestMiddleware::class => create()->constructor(get('psr17factory')),
     'guest' => get(GuestMiddleware::class),
 
-    /*** COMMAND BUS **/
+    /* COMMAND BUS */
     ClassNameExtractor::class => create(),
     'extractor' => get(ClassNameExtractor::class),
     HandleInflector::class => create(),
@@ -101,7 +101,7 @@ return [
     CommandBus::class => create()->constructor([get('commandhandler')]),
     'commandbus' => get(CommandBus::class),
 
-    /*** TEMPLATE ENGINE **/
+    /* TEMPLATE ENGINE */
     Twig_Loader_Filesystem::class => create()->constructor(VIEW_PATH),
     'loader' => get(Twig_Loader_Filesystem::class),
     Twig_Environment::class => create()->constructor(get('loader'), $view)->method('addExtension', get('apptwigext')),
@@ -112,7 +112,7 @@ return [
     FSBTwigExtension::class => create()->constructor(get('session'), get('request')),
     'apptwigext' => get(FSBTwigExtension::class),
 
-    /*** INPUT VALIDATOR **/
+    /* INPUT VALIDATOR */
     Validator::class => function (ContainerInterface $c) {
         $request = $c->get('request');
         $post = $request->getParsedBody();
@@ -124,12 +124,12 @@ return [
     },
     'validator' => get(Validator::class),
 
-    /*** CONTROLLERS **/
+    /* CONTROLLERS */
     HomeController::class => create()->constructor(get('psr17factory'), get('template'), get('commandbus'), get('validator'), get('session')),
     LoginController::class => create()->constructor(get('psr17factory'), get('template'), get('commandbus'), get('validator'), get('session')),
     UserController::class => create()->constructor(get('psr17factory'), get('template'), get('commandbus'), get('validator'), get('session')),
 
-    /*** COMMAND HANDLERS **/
+    /* COMMAND HANDLERS */
     LogoutHandler::class => create(),
     LoginHandler::class => create(),
 
