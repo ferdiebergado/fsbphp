@@ -6,13 +6,14 @@ use Psr\Http\Message \{
     ResponseInterface, ServerRequestInterface
 };
 use App\Model\User;
-use FSB\Session\SessionHelper;
 use App\Command \{
     LogoutCommand, LoginCommand
 };
 
 class LoginController extends Controller
 {
+    protected $redirectPathOnLogout = '/login';
+
     public function show(ServerRequestInterface $request) : ResponseInterface
     {
         return $this->view("sections/login");
@@ -20,28 +21,27 @@ class LoginController extends Controller
 
     public function login(ServerRequestInterface $request) : ResponseInterface
     {
-        $session = new SessionHelper($request);
-        $redirectPath = $session->getFlash('REDIRECT_PATH');
-        // die(var_dump($redirectPath));
         $body = $request->getParsedBody();
-        $session->flash('old', $body);
+        $this->session->flash('old', $body);
         $this->validator
             ->rule('required', ['email', 'password'])
             ->rule('email', 'email')
             ->rule('lengthMin', 'password', 8);
-        $invalid = "Invalid input.";
         if (!$this->validator->validate()) {
             $errors = $this->validator->errors();
             $statuscode = 403;
-            $session->flash('errors', $errors);
-            $session->flash('error', $invalid);
+            $invalid = "Invalid input.";
+            $this->session->flash('errors', $errors);
+            $this->session->flash('error', $invalid);
             return $this->response->withStatus($statuscode)->withHeader('Location', $request->getUri()->getPath());
         }
 
-        $login = new LoginCommand($session, $body);
+        $login = new LoginCommand($this->session, $body);
         $loggedIn = $this->commandBus->handle($login);
 
         if ($loggedIn) {
+            $redirectPath = $this->session->get('REDIRECT_PATH');
+            $this->session->set('REDIRECT_PATH', null);
             return $this->response->withHeader('Location', $redirectPath);
         }
 
@@ -51,9 +51,8 @@ class LoginController extends Controller
 
     public function logout(ServerRequestInterface $request) : ResponseInterface
     {
-        $session = new SessionHelper($request);
-        $logout = new LogoutCommand($session);
+        $logout = new LogoutCommand($this->session);
         $this->commandBus->handle($logout);
-        return $this->response->withHeader('Location', '/login');
+        return $this->response->withHeader('Location', $this->redirectPathOnLogout);
     }
 }

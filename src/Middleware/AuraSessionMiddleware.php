@@ -67,13 +67,15 @@ class AuraSessionMiddleware implements MiddlewareInterface
         $factory = $this->factory ? : new SessionFactory();
         $session = $factory->newInstance($request->getCookieParams());
 
-        if ($this->name !== null) {
-            $session->setName($this->name);
-        }
+        if (!$session->isStarted()) {
+            if ($this->name !== null) {
+                $session->setName($this->name);
+            }
 
-        if ($this->config !== null) {
-            $session->setSavePath($this->config['save_path']);
-            $session->setCookieParams($this->config['cookie']);
+            if ($this->config !== null) {
+                $session->setSavePath($this->config['save_path']);
+                $session->setCookieParams($this->config['cookie']);
+            }
         }
 
         $request = $request->withAttribute($this->attribute, $session);

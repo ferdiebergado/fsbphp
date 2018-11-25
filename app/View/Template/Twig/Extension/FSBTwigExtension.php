@@ -7,7 +7,7 @@ use DebugBar\StandardDebugBar;
 use DebugBar\Bridge\Twig\TraceableTwigEnvironment;
 use Psr\Http\Message\ServerRequestInterface;
 
-class AppTwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsInterface
+class FSBTwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsInterface
 {
     protected $session;
     protected $request;
