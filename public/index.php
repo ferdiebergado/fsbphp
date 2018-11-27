@@ -23,9 +23,9 @@ define('LOG_FILE', CACHE_PATH . 'app_' . date('Y') . '.log');
 require BASE_PATH . 'vendor' . DS . 'autoload.php';
 
 /* Register the error handler */
-$whoops = new Whoops\Run;
 use Whoops\Handler\PrettyPageHandler;
 
+$whoops = new Whoops\Run;
 $pagehandler = new PrettyPageHandler;
 
 if (DEBUG_MODE) {
@@ -43,27 +43,30 @@ if (DEBUG_MODE) {
         require VIEW_PATH . 'errors/500.php';
     });
 }
-$whoops->register();
+// $whoops->register();
 
 /** Instantiate the DI Container
  * @var Psr\Container\ContainerInterface $c */
-$c = new FSB\Container();
-
-/** Initialize the Router
- * @var League\Route\Router $router
- * @var League\Route\Route $routes */
-$router = $c->get('router');
-$router
-    ->middleware($c->get('headers'))
-    ->middleware($c->get('content-type'))
-    ->middleware($c->get('mw_session'));
-$routes = include(CONFIG_PATH . 'routes.php');
+$container = new FSB\Container();
 
 /** Create a Server Request
  * @var Psr\Http\Message\ServerRequestInterface $request */
-$request = $c->get('request');
+$request = $container->get('request');
 
-/** Send the response to the client
- * @var Psr\Http\Message\ResponseInterface $response */
-$response = $router->dispatch($request);
-return Http\Response\send($response);
+/* Router */
+$router = $container->get('router');
+$map = $router->getMap();
+include(CONFIG_PATH . 'routes.php');
+
+/**
+ * Dispatch the middleware stack
+ * @var array $middlewares
+ * @var Psr\Http\Message\ResponseInterface $response 
+ */
+$middlewares = include(CONFIG_PATH . 'middlewares.php');
+$dispatcher = new Middleland\Dispatcher($middlewares, $container);
+$response = $dispatcher->dispatch($request);
+
+/** Send the response to the client */
+$emitter = new Zend\HttpHandlerRunner\Emitter\SapiEmitter;
+return $emitter->emit($response);

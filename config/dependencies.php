@@ -1,10 +1,6 @@
 <?php
 
-use function DI \{
-    create, get
-};
-use Nyholm\Psr7\Factory\Psr17Factory;
-use Nyholm\Psr7Server\ServerRequestCreator;
+
 use Psr\Http\Message\ResponseFactoryInterface;
 use Middlewares \{
     ContentType
@@ -31,9 +27,16 @@ use League\Tactician\CommandBus;
 use League\Tactician\Handler\CommandNameExtractor\ClassNameExtractor;
 use App\Handler\LogoutHandler;
 use Valitron\Validator;
-use FSB\Router\FSBApplicationStrategy;
-use League\Route\Router;
 use App\Handler\LoginHandler;
+use function DI \{
+    create, get
+};
+use Zend\Diactoros\ServerRequestFactory;
+use Middleland\Dispatcher;
+use Aura\Router\RouterContainer;
+use Middlewares\RequestHandler;
+use Middlewares\AuraRouter;
+use Zend\Diactoros\ResponseFactory;
 
 $session = require(CONFIG_PATH . 'session.php');
 $view = require(CONFIG_PATH . 'view.php');
@@ -46,22 +49,34 @@ return [
     'container' => get(Container::class),
 
     /* PSR-7 HTTP MESSAGE IMPLEMENTATION */
-    Psr17Factory::class => create(),
-    'psr17factory' => get(Psr17Factory::class),
-    ServerRequestCreator::class => create()->constructor(get('psr17factory'), get('psr17factory'), get('psr17factory'), get('psr17factory')),
-    'serverrequest' => get(ServerRequestCreator::class),
+    ServerRequestFactory::class => create(),
+    'serverrequest' => get(ServerRequestFactory::class),
+    ResponseFactory::class => create(),
+    'responsefactory' => get(ResponseFactory::class),
     'request' => function (ContainerInterface $c) {
         $serverrequest = $c->get('serverrequest');
         return $serverrequest->fromGlobals();
     },    
-    
-    /* ROUTER/PSR-15 REQUEST HANDLER */
-    FSBApplicationStrategy::class => create()->method('setContainer', get('container')),
-    'strategy' => get(FSBApplicationStrategy::class),
-    Router::class => create()->method('setStrategy', get('strategy')),
-    'router' => get(Router::class),
+
+    /* Router */
+    RouterContainer::class => create(),
+    'router' => get(RouterContainer::class),
+    // 'routes' => function (ContainerInterface $c) {
+    //     $router = $c->get('router');
+    //     $map = $router->getMap();
+    //     $routes = include(CONFIG_PATH . 'routes.php');
+    //     return $routes;
+    // },
 
     /* MIDDLEWARES */
+
+    /* Routes */
+    AuraRouter::class => create()->constructor(get('router')),
+    'mw_router' => get(AuraRouter::class),
+
+    /* Request-Handler */
+    RequestHandler::class => create()->constructor(get('container')),
+    'requesthandler' => get(RequestHandler::class),
 
     /* Headers */
     HeadersMiddleware::class => create(),
@@ -80,13 +95,13 @@ return [
     'content-type' => get(ContentType::class),
 
     /* CSRF Protection */
-    VerifyCsrfTokenMiddleware::class => create()->constructor(get('psr17factory')),
+    VerifyCsrfTokenMiddleware::class => create()->constructor(get('responsefactory')),
     'csrf' => get(VerifyCsrfTokenMiddleware::class),
 
     /* Authentication */
-    AuthMiddleware::class => create()->constructor(get('psr17factory')),
+    AuthMiddleware::class => create()->constructor(get('responsefactory')),
     'auth' => get(AuthMiddleware::class),
-    GuestMiddleware::class => create()->constructor(get('psr17factory')),
+    GuestMiddleware::class => create()->constructor(get('responsefactory')),
     'guest' => get(GuestMiddleware::class),
 
     /* COMMAND BUS */
@@ -125,9 +140,9 @@ return [
     'validator' => get(Validator::class),
 
     /* CONTROLLERS */
-    HomeController::class => create()->constructor(get('psr17factory'), get('template'), get('commandbus'), get('validator')),
-    LoginController::class => create()->constructor(get('psr17factory'), get('template'), get('commandbus'), get('validator')),
-    UserController::class => create()->constructor(get('psr17factory'), get('template'), get('commandbus'), get('validator')),
+    HomeController::class => create()->constructor(get('responsefactory'), get('template'), get('commandbus'), get('validator')),
+    LoginController::class => create()->constructor(get('responsefactory'), get('template'), get('commandbus'), get('validator')),
+    UserController::class => create()->constructor(get('responsefactory'), get('template'), get('commandbus'), get('validator')),
 
     /* COMMAND HANDLERS */
     LogoutHandler::class => create(),

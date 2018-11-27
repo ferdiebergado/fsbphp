@@ -1,5 +1,5 @@
 {
-    "name": "d0np0br3/phpferdie",
+    "name": "ferdiebergado/bergadophp",
     "description": "A PHP Web Application Skeleton",
     "type": "project",
     "license": "MIT",
@@ -42,18 +42,19 @@
     },
     "require": {
         "filp/whoops": "^2.3",
-        "http-interop/response-sender": "^1.0",
         "illuminate/database": "^5.7",
-        "league/route": "^4.2",
         "league/tactician": "^1.0",
         "league/tactician-container": "^2.0",
+        "middlewares/aura-router": "^1.1",
         "middlewares/aura-session": "^1.1",
         "middlewares/negotiation": "^1.1",
-        "nyholm/psr7": "^1.0",
-        "nyholm/psr7-server": "^0.3.0",
+        "middlewares/request-handler": "^1.4",
+        "oscarotero/middleland": "^1.0",
         "php-di/php-di": "^6.0",
         "twig/twig": "^2.5",
         "vlucas/phpdotenv": "^2.5",
-        "vlucas/valitron": "^1.4"
+        "vlucas/valitron": "^1.4",
+        "zendframework/zend-diactoros": "^2.0",
+        "zendframework/zend-httphandlerrunner": "^1.0"
     }
 }
