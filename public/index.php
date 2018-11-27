@@ -9,7 +9,7 @@ if (PHP_SAPI === 'cli-server' && $_SERVER['SCRIPT_FILENAME'] !== __FILE__) {
 
 /* Global constants */
 define('FSB_TIME', microtime(true));
-define('DEBUG_MODE', false);
+define('DEBUG_MODE', true);
 define('DS', DIRECTORY_SEPARATOR);
 define('BASE_PATH', __DIR__ . DS . '..' . DS);
 define('CONFIG_PATH', BASE_PATH . 'config' . DS);
@@ -43,7 +43,7 @@ if (DEBUG_MODE) {
         require VIEW_PATH . 'errors/500.php';
     });
 }
-// $whoops->register();
+$whoops->register();
 
 /** Instantiate the DI Container
  * @var Psr\Container\ContainerInterface $c */
@@ -53,20 +53,22 @@ $container = new FSB\Container();
  * @var Psr\Http\Message\ServerRequestInterface $request */
 $request = $container->get('request');
 
-/* Router */
+/** Load the application routes  
+ * @var \Aura\Router\RouterContainer $router
+ * @var \Aura\Router\Map $map */
 $router = $container->get('router');
 $map = $router->getMap();
 include(CONFIG_PATH . 'routes.php');
 
-/**
- * Dispatch the middleware stack
+/** Dispatch the middleware stack
  * @var array $middlewares
- * @var Psr\Http\Message\ResponseInterface $response 
- */
+ * @var \Middleland\Dispatcher $dispatcher
+ * @var Psr\Http\Message\ResponseInterface $response */
 $middlewares = include(CONFIG_PATH . 'middlewares.php');
 $dispatcher = new Middleland\Dispatcher($middlewares, $container);
 $response = $dispatcher->dispatch($request);
 
-/** Send the response to the client */
+/** Send the response to the client 
+ * @var \Zend\HttpHandlerRunner\Emitter\SapiEmitter $emitter */
 $emitter = new Zend\HttpHandlerRunner\Emitter\SapiEmitter;
 return $emitter->emit($response);

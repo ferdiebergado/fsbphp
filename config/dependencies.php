@@ -61,12 +61,6 @@ return [
     /* Router */
     RouterContainer::class => create(),
     'router' => get(RouterContainer::class),
-    // 'routes' => function (ContainerInterface $c) {
-    //     $router = $c->get('router');
-    //     $map = $router->getMap();
-    //     $routes = include(CONFIG_PATH . 'routes.php');
-    //     return $routes;
-    // },
 
     /* MIDDLEWARES */
 

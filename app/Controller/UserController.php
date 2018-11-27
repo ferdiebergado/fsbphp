@@ -9,9 +9,10 @@ use Psr\Http\Message \{
 
 class UserController extends Controller
 {
-    public function show(ServerRequestInterface $request, array $params) : ResponseInterface
+    public function show(ServerRequestInterface $request) : ResponseInterface
     {
-        $data = User::find($params['user']);
+        $user = $request->getAttribute('user');
+        $data = User::find($user);
         return $this->view("home", compact('data'));
     }
 }
