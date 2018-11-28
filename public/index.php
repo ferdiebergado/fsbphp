@@ -54,13 +54,9 @@ $container = new FSB\Container();
 $request = $container->get('request');
 
 /** Load the application routes  
- * @var \Aura\Router\RouterContainer $router
- * @var \Aura\Router\Map $map */
+ * @var \FSB\Router\Router $router */
 $router = $container->get('router');
-$rules = $router->getRuleIterator();
-$rules->append(new FSB\Router\Rule\AuthRule());
-$map = $router->getMap();
-include(CONFIG_PATH . 'routes.php');
+$router->start();
 
 /** Dispatch the middleware stack
  * @var array $middlewares

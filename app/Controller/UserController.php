@@ -11,7 +11,7 @@ class UserController extends Controller
 {
     public function show(ServerRequestInterface $request) : ResponseInterface
     {
-        $user = $request->getAttribute('user');
+        $user = (int)$request->getAttribute('user');
         $data = User::find($user);
         return $this->view("home", compact('data'));
     }

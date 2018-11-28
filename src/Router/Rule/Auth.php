@@ -7,7 +7,7 @@ use Aura\Router\Rule\RuleInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use FSB\Session\SessionHelper;
 
-class AuthRule implements RuleInterface
+class Auth implements RuleInterface
 {
     public function __invoke(ServerRequestInterface $request, Route $route)
     {

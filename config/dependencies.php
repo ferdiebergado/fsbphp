@@ -7,10 +7,10 @@ use Zend\Diactoros \{
 };
 use FSB\Container;
 use Middlewares \{
-    ContentType, RequestHandler, AuraRouter
+    ContentType, RequestHandler
 };
 use FSB\Middleware \{
-    HeadersMiddleware, VerifyCsrfTokenMiddleware, AuraSessionMiddleware, AuthMiddleware, GuestMiddleware, SanitizeInputMiddleware
+    HeadersMiddleware, VerifyCsrfTokenMiddleware, AuraSessionMiddleware, AuthMiddleware, GuestMiddleware, SanitizeInputMiddleware, AuraRouter
 };
 use FSB\Session \{
     Session, SessionHelper
@@ -36,6 +36,7 @@ use function DI \{
 };
 use Middleland\Dispatcher;
 use Aura\Router\RouterContainer;
+use FSB\Router\Router;
 
 $session = require(CONFIG_PATH . 'session.php');
 $view = require(CONFIG_PATH . 'view.php');
@@ -59,12 +60,14 @@ return [
 
     /* Router */
     RouterContainer::class => create(),
-    'router' => get(RouterContainer::class),
+    'routercontainer' => get(RouterContainer::class),
+    Router::class => create()->constructor(get('routercontainer')),
+    'router' => get(Router::class),
 
     /* MIDDLEWARES */
 
     /* Routes */
-    AuraRouter::class => create()->constructor(get('router'))->method('responseFactory', get('responsefactory')),
+    AuraRouter::class => create()->constructor(get('routercontainer'))->method('responseFactory', get('responsefactory')),
     'mw_router' => get(AuraRouter::class),
 
     /* Request-Handler */
@@ -91,11 +94,11 @@ return [
     VerifyCsrfTokenMiddleware::class => create()->constructor(get('responsefactory')),
     'csrf' => get(VerifyCsrfTokenMiddleware::class),
 
-    /* Authentication */
-    AuthMiddleware::class => create()->constructor(get('responsefactory')),
-    'auth' => get(AuthMiddleware::class),
-    GuestMiddleware::class => create()->constructor(get('responsefactory')),
-    'guest' => get(GuestMiddleware::class),
+    /* Router */
+    // RouterMiddleware::class => create()->constructor(get('router'))->method('responseFactory', get('responsefactory')),
+    // 'mw_router' => get(RouterMiddleware::class),
+    // GuestMiddleware::class => create()->constructor(get('responsefactory')),
+    // 'guest' => get(GuestMiddleware::class),
 
     /* Sanitize Input */
     SanitizeInputMiddleware::class => create(),
