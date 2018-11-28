@@ -57,6 +57,8 @@ $request = $container->get('request');
  * @var \Aura\Router\RouterContainer $router
  * @var \Aura\Router\Map $map */
 $router = $container->get('router');
+$rules = $router->getRuleIterator();
+$rules->append(new FSB\Router\Rule\AuthRule());
 $map = $router->getMap();
 include(CONFIG_PATH . 'routes.php');
 

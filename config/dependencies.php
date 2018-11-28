@@ -1,42 +1,41 @@
 <?php
 
-
 use Psr\Http\Message\ResponseFactoryInterface;
-use Middlewares \{
-    ContentType
+use Psr\Container\ContainerInterface;
+use Zend\Diactoros \{
+    ServerRequestFactory, ResponseFactory
 };
-use App\Controller \{
-    HomeController, LoginController, UserController
+use FSB\Container;
+use Middlewares \{
+    ContentType, RequestHandler, AuraRouter
 };
 use FSB\Middleware \{
-    HeadersMiddleware, VerifyCsrfTokenMiddleware, AuraSessionMiddleware, AuthMiddleware, GuestMiddleware
+    HeadersMiddleware, VerifyCsrfTokenMiddleware, AuraSessionMiddleware, AuthMiddleware, GuestMiddleware, SanitizeInputMiddleware
 };
 use FSB\Session \{
     Session, SessionHelper
 };
-use FSB\Container;
+use App\Controller \{
+    HomeController, LoginController, UserController
+};
 use App\View\Template\Twig\TwigTemplate;
 use App\View\Template\TemplateInterface;
 use App\View\Template\Twig\Extension\AppTwigExtension;
 use Aura\Session\SessionFactory;
-use Psr\Container\ContainerInterface;
 use League\Tactician\Container\ContainerLocator;
 use League\Tactician\Handler\CommandHandlerMiddleware;
 use League\Tactician\Handler\MethodNameInflector\HandleInflector;
 use League\Tactician\CommandBus;
 use League\Tactician\Handler\CommandNameExtractor\ClassNameExtractor;
-use App\Handler\LogoutHandler;
+use App\Handler \{
+    LogoutHandler, LoginHandler
+};
 use Valitron\Validator;
-use App\Handler\LoginHandler;
 use function DI \{
     create, get
 };
-use Zend\Diactoros\ServerRequestFactory;
 use Middleland\Dispatcher;
 use Aura\Router\RouterContainer;
-use Middlewares\RequestHandler;
-use Middlewares\AuraRouter;
-use Zend\Diactoros\ResponseFactory;
 
 $session = require(CONFIG_PATH . 'session.php');
 $view = require(CONFIG_PATH . 'view.php');
@@ -65,7 +64,7 @@ return [
     /* MIDDLEWARES */
 
     /* Routes */
-    AuraRouter::class => create()->constructor(get('router')),
+    AuraRouter::class => create()->constructor(get('router'))->method('responseFactory', get('responsefactory')),
     'mw_router' => get(AuraRouter::class),
 
     /* Request-Handler */
@@ -98,6 +97,10 @@ return [
     GuestMiddleware::class => create()->constructor(get('responsefactory')),
     'guest' => get(GuestMiddleware::class),
 
+    /* Sanitize Input */
+    SanitizeInputMiddleware::class => create(),
+    'sanitize' => get(SanitizeInputMiddleware::class),
+
     /* COMMAND BUS */
     ClassNameExtractor::class => create(),
     'extractor' => get(ClassNameExtractor::class),
@@ -122,15 +125,16 @@ return [
     'apptwigext' => get(AppTwigExtension::class),
 
     /* INPUT VALIDATOR */
-    Validator::class => function (ContainerInterface $c) {
-        $request = $c->get('request');
-        $post = $request->getParsedBody();
-        foreach ($post as $key => $value) {
-            $post[$key] = test_input($post[$key]);
-            $post[$key] = filter_input(INPUT_POST, $key, FILTER_SANITIZE_STRING);
-        }
-        return new Validator($post);
-    },
+    // Validator::class => function (ContainerInterface $c) {
+    //     $request = $c->get('request');
+    //     $post = $request->getParsedBody();
+    //     foreach ($post as $key => $value) {
+    //         $post[$key] = test_input($post[$key]);
+    //         $post[$key] = filter_input(INPUT_POST, $key, FILTER_SANITIZE_STRING);
+    //     }
+    //     return new Validator($post);
+    // },
+    Validator::class => create(),
     'validator' => get(Validator::class),
 
     /* CONTROLLERS */

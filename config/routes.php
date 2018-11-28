@@ -15,6 +15,6 @@ $map->get('home', '/', [$namespace . 'HomeController', 'index']);
 $map->get('login', '/login', [$namespace . 'LoginController', 'show']);
 $map->post('login.post', '/login', [$namespace . 'LoginController', 'login']);
 $map->post('logout', '/logout', [$namespace . 'LoginController', 'logout']);
-$map->get('users', '/users/{user}', [$namespace . 'UserController', 'show']);
+$map->get('users', '/users/{user}', [$namespace . 'UserController', 'show'])->auth(['loggedIn' => true]);
 
 return $map;

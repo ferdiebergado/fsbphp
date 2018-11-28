@@ -10,9 +10,14 @@ use FSB\Session\SessionHelper;
 use App\Command \{
     LogoutCommand, LoginCommand
 };
+use Zend\Diactoros\Response\RedirectResponse;
+use Valitron\Validator;
 
 class LoginController extends Controller
 {
+    protected $loginPath = "/login";
+    protected $redirectPath = "/";
+
     /**
      * Show the Login form.
      * 
@@ -40,36 +45,40 @@ class LoginController extends Controller
      */
     public function login(ServerRequestInterface $request) : ResponseInterface
     {
-        $session = new SessionHelper($request);
         $body = $request->getParsedBody();
+        $session = new SessionHelper($request);
         $session->flash('old', $body);
-        $this->validator
+        $validator = new Validator($body);
+        $validator
             ->rule('required', ['email', 'password'])
             ->rule('email', 'email')
             ->rule('lengthMin', 'password', 8);
         $invalid = "Invalid input.";
-        if (!$this->validator->validate()) {
-            $errors = $this->validator->errors();
-            $statuscode = 403;
+        if (!$validator->validate()) {
+            $errors = $validator->errors();
+            // $statuscode = 403;
             $session->flash('errors', $errors);
             $session->flash('error', $invalid);
-            return $this->response->withStatus($statuscode)->withHeader('Location', $request->getUri()->getPath());
+            return new RedirectResponse($this->loginPath);
+            // return $this->response->withStatus($statuscode)->withHeader('Location', $request->getUri()->getPath());
         }
 
         $login = new LoginCommand($session, $body);
         $loggedIn = $this->commandBus->handle($login);
 
         if ($loggedIn) {
-            $redirectPath = $session->get('REDIRECT_PATH');
+            // $redirectPath = $session->get('REDIRECT_PATH');
             // if (null === $redirectPath && $redirectPath !== '/login') {
             //     $redirectPath = '/';
             // }
             // $session->set('REDIRECT_PATH', null);
-            return $this->response->withHeader('Location', '/');
+            return new RedirectResponse($this->redirectPath);
+            // return $this->response->withHeader('Location', '/');
         }
 
-        $statuscode = 401;
-        return $this->response->withStatus($statuscode)->withHeader('Location', $request->getUri()->getPath());
+        // $statuscode = 401;
+        // return $this->response->withStatus($statuscode)->withHeader('Location', $request->getUri()->getPath());
+        return new RedirectResponse($this->loginPath);
     }
 
     /**
@@ -87,6 +96,6 @@ class LoginController extends Controller
         $session = new SessionHelper($request);
         $logout = new LogoutCommand($session);
         $this->commandBus->handle($logout);
-        return $this->response->withHeader('Location', '/login');
+        return new RedirectResponse($this->loginPath);
     }
 }
