@@ -4,6 +4,7 @@ namespace FSB\Router;
 
 use FSB\Router\Rule\Auth;
 use Aura\Router\RouterContainer;
+use FSB\Router\Rule\Guest;
 
 class Router
 {
@@ -17,8 +18,10 @@ class Router
     public function start()
     {
         // $router = $container->get('router');
-        $rules = $this->router->getRuleIterator();
-        $rules->append(new Auth());
+        $this->router->getRuleIterator()->set([
+            new Auth(),
+            // new Guest(),
+        ]);
         if (!DEBUG_MODE) {
 
             $this->router->setMapBuilder(function ($map) {

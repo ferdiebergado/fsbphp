@@ -62,6 +62,8 @@ class AuraRouter implements MiddlewareInterface
                 case 'Aura\Router\Rule\Host':
                 case 'Aura\Router\Rule\Path':
                     return $this->createResponse(404); // 404 NOT FOUND
+                case 'FSB\Router\Rule\Guest':
+                    return new RedirectResponse('/');
                 case 'FSB\Router\Rule\Auth':
                     return new RedirectResponse('/login');
                 default:
