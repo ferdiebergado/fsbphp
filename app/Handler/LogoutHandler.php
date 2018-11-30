@@ -8,6 +8,7 @@ class LogoutHandler
 {
     public function handle(LogoutCommand $logout)
     {
+        $logout->session->clear();
         $logout->session->destroy();
     }
 }

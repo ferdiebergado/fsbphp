@@ -46,8 +46,8 @@ class LoginController extends Controller
     public function login(ServerRequestInterface $request) : ResponseInterface
     {
         $body = $request->getParsedBody();
-        $session = new SessionHelper($request);
-        $session->flash('old', $body);
+        $session = $request->getAttribute('session');
+        $segment = $request->getAttribute('segment');
         $validator = new Validator($body);
         $validator
             ->rule('required', ['email', 'password'])
@@ -56,28 +56,23 @@ class LoginController extends Controller
         $invalid = "Invalid input.";
         if (!$validator->validate()) {
             $errors = $validator->errors();
-            // $statuscode = 403;
-            $session->flash('errors', $errors);
-            $session->flash('error', $invalid);
+            $segment->setFlash('old', $body);
+            $segment->setFlash('errors', $errors);
+            $segment->setFlash('error', $invalid);
             return new RedirectResponse($this->loginPath);
-            // return $this->response->withStatus($statuscode)->withHeader('Location', $request->getUri()->getPath());
         }
 
-        $login = new LoginCommand($session, $body);
+        $login = new LoginCommand($session, $segment, $body);
         $loggedIn = $this->commandBus->handle($login);
 
         if ($loggedIn) {
-            // $redirectPath = $session->get('REDIRECT_PATH');
-            // if (null === $redirectPath && $redirectPath !== '/login') {
-            //     $redirectPath = '/';
-            // }
-            // $session->set('REDIRECT_PATH', null);
-            return new RedirectResponse($this->redirectPath);
-            // return $this->response->withHeader('Location', '/');
+            $redirectPath = $segment->get('REDIRECT_PATH');
+            if (null === $redirectPath || $redirectPath === $this->loginPath) {
+                $redirectPath = '/';
+            }
+            return new RedirectResponse($redirectPath);
         }
 
-        // $statuscode = 401;
-        // return $this->response->withStatus($statuscode)->withHeader('Location', $request->getUri()->getPath());
         return new RedirectResponse($this->loginPath);
     }
 
@@ -93,7 +88,7 @@ class LoginController extends Controller
      */
     public function logout(ServerRequestInterface $request) : ResponseInterface
     {
-        $session = new SessionHelper($request);
+        $session = $request->getAttribute('session');
         $logout = new LogoutCommand($session);
         $this->commandBus->handle($logout);
         return new RedirectResponse($this->loginPath);

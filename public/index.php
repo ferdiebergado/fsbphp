@@ -60,11 +60,14 @@ $router->start();
 
 /** Dispatch the middleware stack
  * @var array $middlewares
- * @var \Middleland\Dispatcher $dispatcher
- * @var Psr\Http\Message\ResponseInterface $response */
+ * @var \Relay\Relay $dispatcher
+ * @var \Psr\Http\Message\ResponseInterface $response */
 $middlewares = include(CONFIG_PATH . 'middlewares.php');
-$dispatcher = new Middleland\Dispatcher($middlewares, $container);
-$response = $dispatcher->dispatch($request);
+$resolver = function ($entry) use ($container) {
+    return $container->get($entry);
+};
+$dispatcher = new Relay\Relay($middlewares, $resolver);
+$response = $dispatcher->handle($request);
 
 /** Send the response to the client 
  * @var \Zend\HttpHandlerRunner\Emitter\SapiEmitter $emitter */

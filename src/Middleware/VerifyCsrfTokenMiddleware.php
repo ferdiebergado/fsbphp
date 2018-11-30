@@ -8,12 +8,17 @@ use Psr\Http\Server \{
 use Psr\Http\Message \{
     ResponseInterface, ServerRequestInterface
 };
-use FSB\Session\SessionHelper;
+use Zend\Diactoros\Response\RedirectResponse;
 
-class VerifyCsrfTokenMiddleware extends Middleware implements MiddlewareInterface
+class VerifyCsrfTokenMiddleware implements MiddlewareInterface
 {
-    protected $csrf_error = "Token Mismatch.";
-    protected $csrf_statuscode = "401";
+    protected $methods = [
+        'POST',
+        'PUT',
+        'PATCH',
+        'DELETE'
+    ];
+    protected $error = "Token Mismatch.";
 
     /**
      * Process an incoming server request and return a response, optionally delegating
@@ -21,16 +26,27 @@ class VerifyCsrfTokenMiddleware extends Middleware implements MiddlewareInterfac
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface
     {
-        $body = $request->getParsedBody();
-        $session = new SessionHelper($request);
-        if (array_key_exists('__csrf_value', $body)) {
-            $csrf_value = $body['__csrf_value'];
-            $csrf_token = $session->getSession()->getCsrfToken();
-            if ($csrf_token->isValid($csrf_value)) {
-                return $handler->handle($request);
+        if (in_array($request->getMethod(), $this->methods)) {
+            $post = $request->getParsedBody();
+            foreach ($post as $key => $value) {
+                $post[$key] = test_input($post[$key]);
+                $post[$key] = filter_input(INPUT_POST, $key, FILTER_SANITIZE_STRING);
             }
+            $request = $request->withParsedBody($post);
+            if (array_key_exists('__csrf_value', $post)) {
+                $csrf_value = $post['__csrf_value'];
+                $session = $request->getAttribute('session');
+                $csrf_token = $session->getCsrfToken();
+                if ($csrf_token->isValid($csrf_value)) {
+                    return $handler->handle($request);
+                }
+            }
+            $segment = $request->getAttribute('segment');
+            $segment->setFlash('old', $post);
+            $segment->setFlash('error', $this->error);
+            $redirectPath = $request->getUri()->getPath();
+            return new RedirectResponse($redirectPath);
         }
-        $session->flash('error', $this->csrf_error);
-        return $this->response->withStatus($this->csrf_statuscode)->withHeader('Location', $request->getUri()->getPath());
+        return $handler->handle($request);
     }
 }

@@ -10,6 +10,7 @@ class LoginHandler
     public function handle(LoginCommand $login)
     {
         $session = $login->session;
+        $segment = $login->segment;
         $body = $login->body;
         $user = User::where('email', $body['email'])->first();
         if (null !== $user) {
@@ -19,17 +20,18 @@ class LoginHandler
                     $newhash = password_hash($password, PASSWORD_DEFAULT);
                     $user->update(['password' => $newhash]);
                 }
-                // cache_remember('user_' . $user['id'], 30, $authuser);
                 $user->update(['last_login' => date('Y-m-d H:i:s')]);
+                $user = $user->toArray();
+                cache_remember('user_' . $user['id'], 30, $user);
                 $session->regenerateId();
-                $session->set('user', $user);
-                $session->flash('status', 'You are now logged in!');
+                $segment->set('user', $user);
+                $segment->setFlash('status', 'You are now logged in!');
                 return true;
             }
         }
         $error = "Invalid username or password";
-        $session->flash('errors', ['email' => [0 => $error]]);
-        $session->flash('error', 'Invalid credentials.');
+        $segment->setFlash('errors', ['email' => [0 => $error]]);
+        $segment->setFlash('error', 'Invalid credentials.');
         return false;
     }
 }

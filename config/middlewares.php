@@ -4,19 +4,8 @@ return [
     'headers',
     'content-type',
     'mw_session',
+    'set-attributes',
     'mw_router',
-    [
-        function ($request) {
-            $protected = [
-                'POST',
-                'PUT',
-                'PATCH',
-                'DELETE'
-            ];
-            return in_array($request->getMethod(), $protected);
-        },
-        'csrf',
-        'sanitize'
-    ],
+    'csrf',
     'requesthandler'
 ];

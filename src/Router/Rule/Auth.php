@@ -12,22 +12,16 @@ class Auth implements RuleInterface
     public function __invoke(ServerRequestInterface $request, Route $route)
     {
         if (isset($route->auth['loggedIn'])) {
-            if ($route->auth['loggedIn'] === true) {
-                $session = new SessionHelper($request);
-                if (null === $session->get('user')) {
+            if ($route->auth['loggedIn']) {
+                $user = $request->getAttribute('user');
+                if (null === $user) {
+                    $redirectPath = $request->getUri()->getPath();
+                    $segment = $request->getAttribute('segment');
+                    $segment->set('REDIRECT_PATH', $redirectPath);
                     return false;
                 }
-                return true;
             }
         }
-        if (isset($route->auth['guest'])) {
-            if ($route->auth['guest'] === true) {
-                $session = new SessionHelper($request);
-                if (null !== $session->get('user')) {
-                    return false;
-                }
-                return true;
-            }
-        }
+        return true;
     }
 }

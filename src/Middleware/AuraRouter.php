@@ -52,7 +52,6 @@ class AuraRouter implements MiddlewareInterface
 
         if (!$route) {
             $failedRoute = $matcher->getFailedRoute();
-
             switch ($failedRoute->failedRule) {
                 case 'Aura\Router\Rule\Allows':
                     return $this->createResponse(405)

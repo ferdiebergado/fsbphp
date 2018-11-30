@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7fd7ab889373c818a687724ea8b7d81f",
+    "content-hash": "65f84930531dab449bbd6dd6b9bb3c37",
     "packages": [
         {
             "name": "aura/router",
@@ -978,58 +978,6 @@
             "time": "2018-10-10T09:24:14+00:00"
         },
         {
-            "name": "oscarotero/middleland",
-            "version": "v1.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/oscarotero/middleland.git",
-                "reference": "abd480afe264714095d043edd76c542a99f1695b"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/oscarotero/middleland/zipball/abd480afe264714095d043edd76c542a99f1695b",
-                "reference": "abd480afe264714095d043edd76c542a99f1695b",
-                "shasum": ""
-            },
-            "require": {
-                "php": "^7.0",
-                "psr/container": "^1.0",
-                "psr/http-server-middleware": "^1.0"
-            },
-            "require-dev": {
-                "friendsofphp/php-cs-fixer": "^2.0",
-                "phpunit/phpunit": "^6.0",
-                "zendframework/zend-diactoros": "^1.3"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Middleland\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Oscar Otero",
-                    "email": "oom@oscarotero.com",
-                    "homepage": "http://oscarotero.com",
-                    "role": "Developer"
-                }
-            ],
-            "description": "PSR-15 middleware dispatcher",
-            "homepage": "https://github.com/oscarotero/dispatcher",
-            "keywords": [
-                "http",
-                "middleware",
-                "psr-15",
-                "psr-7"
-            ],
-            "time": "2018-01-24T20:41:57+00:00"
-        },
-        {
             "name": "php-di/invoker",
             "version": "2.0.0",
             "source": {
@@ -1523,6 +1471,54 @@
                 "simple-cache"
             ],
             "time": "2017-10-23T01:57:42+00:00"
+        },
+        {
+            "name": "relay/relay",
+            "version": "2.0.0-alpha1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/relayphp/Relay.Relay.git",
+                "reference": "5d6345ccfcdab9ce9c3e3c33226164a5759310da"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/relayphp/Relay.Relay/zipball/5d6345ccfcdab9ce9c3e3c33226164a5759310da",
+                "reference": "5d6345ccfcdab9ce9c3e3c33226164a5759310da",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.1",
+                "psr/http-message": "~1.0",
+                "psr/http-server-handler": "~1.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~7.0",
+                "psr/http-server-middleware": "~1.0",
+                "zendframework/zend-diactoros": "~1.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Relay\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Relay.Relay Contributors",
+                    "homepage": "https://github.com/relayphp/Relay.Relay/contributors"
+                }
+            ],
+            "description": "A PSR-7 middleware dispatcher.",
+            "homepage": "https://github.com/relayphp/Relay.Relay",
+            "keywords": [
+                "middleware",
+                "psr-7"
+            ],
+            "time": "2018-02-13T16:52:55+00:00"
         },
         {
             "name": "symfony/polyfill-ctype",
@@ -2977,6 +2973,17 @@
         {
             "name": "roave/security-advisories",
             "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Roave/SecurityAdvisories.git",
+                "reference": "6acf968142215f1614f5909aa006b2bf1ec45cb1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/6acf968142215f1614f5909aa006b2bf1ec45cb1",
+                "reference": "6acf968142215f1614f5909aa006b2bf1ec45cb1",
+                "shasum": ""
+            },
             "conflict": {
                 "3f/pygmentize": "<1.2",
                 "adodb/adodb-php": "<5.20.12",
@@ -3105,7 +3112,7 @@
                 "symfony/yaml": ">=2,<2.0.22|>=2.1,<2.1.7",
                 "tecnickcom/tcpdf": "<6.2.22",
                 "thelia/backoffice-default-template": ">=2.1,<2.1.2",
-                "thelia/thelia": ">=2.1.0-beta1,<2.1.3|>=2.1,<2.1.2",
+                "thelia/thelia": ">=2.1,<2.1.2|>=2.1.0-beta1,<2.1.3",
                 "theonedemon/phpwhois": "<=4.2.5",
                 "titon/framework": ">=0,<9.9.99",
                 "truckersmp/phpwhois": "<=4.3.1",
@@ -3162,7 +3169,7 @@
                 }
             ],
             "description": "Prevents installation of composer packages with known security vulnerabilities: no API, simply require it",
-            "time": "2018-11-26T13:50:48+00:00"
+            "time": "2018-11-27T12:50:30+00:00"
         },
         {
             "name": "sebastian/code-unit-reverse-lookup",
@@ -3951,6 +3958,7 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
+        "relay/relay": 20,
         "roave/security-advisories": 20
     },
     "prefer-stable": true,

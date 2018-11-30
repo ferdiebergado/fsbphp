@@ -28,7 +28,7 @@ use League\Tactician\Handler\MethodNameInflector\HandleInflector;
 use League\Tactician\CommandBus;
 use League\Tactician\Handler\CommandNameExtractor\ClassNameExtractor;
 use App\Handler \{
-    LogoutHandler, LoginHandler
+    LogoutHandler, LoginHandler, UserShowHandler
 };
 use Valitron\Validator;
 use function DI \{
@@ -37,6 +37,8 @@ use function DI \{
 use Middleland\Dispatcher;
 use Aura\Router\RouterContainer;
 use FSB\Router\Router;
+use FSB\Middleware\SetRequestAttributesMiddleware;
+// use FSB\Middleware\Matcher\Method;
 
 $session = require(CONFIG_PATH . 'session.php');
 $view = require(CONFIG_PATH . 'view.php');
@@ -86,6 +88,10 @@ return [
     AuraSessionMiddleware::class => create()->constructor(get('sessionfactory'), $session)->method('name', $session['name']),
     'mw_session' => get(AuraSessionMiddleware::class),
 
+    /* Authenticated User */
+    SetRequestAttributesMiddleware::class => create(),
+    'set-attributes' => get(SetRequestAttributesMiddleware::class),
+
     /* Content-Type Negotiation */
     ContentType::class => create(),
     'content-type' => get(ContentType::class),
@@ -94,15 +100,13 @@ return [
     VerifyCsrfTokenMiddleware::class => create()->constructor(get('responsefactory')),
     'csrf' => get(VerifyCsrfTokenMiddleware::class),
 
-    /* Router */
-    // RouterMiddleware::class => create()->constructor(get('router'))->method('responseFactory', get('responsefactory')),
-    // 'mw_router' => get(RouterMiddleware::class),
-    // GuestMiddleware::class => create()->constructor(get('responsefactory')),
-    // 'guest' => get(GuestMiddleware::class),
-
     /* Sanitize Input */
     SanitizeInputMiddleware::class => create(),
     'sanitize' => get(SanitizeInputMiddleware::class),
+
+    /* Method Matcher */
+    // Method::class => create(),
+    // 'method' => get(Method::class),
 
     /* COMMAND BUS */
     ClassNameExtractor::class => create(),
@@ -148,5 +152,6 @@ return [
     /* COMMAND HANDLERS */
     LogoutHandler::class => create(),
     LoginHandler::class => create(),
+    UserShowHandler::class => create(),
 
 ];

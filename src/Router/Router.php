@@ -17,11 +17,9 @@ class Router
 
     public function start()
     {
-        // $router = $container->get('router');
-        $this->router->getRuleIterator()->set([
-            new Auth(),
-            // new Guest(),
-        ]);
+        $rules = $this->router->getRuleIterator();
+        $rules->append(new Guest());
+        $rules->append(new Auth());
         if (!DEBUG_MODE) {
 
             $this->router->setMapBuilder(function ($map) {
@@ -47,10 +45,9 @@ class Router
                     file_put_contents($cache, serialize($routes));
                 }
             });
+        } else {
+            $map = $this->router->getMap();
+            include(CONFIG_PATH . 'routes.php');
         }
-        $map = $this->router->getMap();
-        include(CONFIG_PATH . 'routes.php');
-        return $this;
     }
 }
-    
