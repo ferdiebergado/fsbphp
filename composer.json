@@ -47,6 +47,8 @@
         "league/tactician-container": "^2.0",
         "middlewares/aura-router": "^1.1",
         "middlewares/aura-session": "^1.1",
+        "middlewares/client-ip": "^1.1",
+        "middlewares/error-handler": "^1.2",
         "middlewares/negotiation": "^1.1",
         "middlewares/request-handler": "^1.4",
         "php-di/php-di": "^6.0",

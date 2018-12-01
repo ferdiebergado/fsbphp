@@ -7,18 +7,18 @@ cardtitle %} Login {% endblock cardtitle %} {% block content %}
         <label for="email">Email</label>
         <input
             type="email"
-            class="form-control {{ (session.getFlash('errors')['email'] is defined) ? 'is-invalid' : '' }}"
+            class="form-control {{ (segment.getFlash('errors')['email'] is defined) ? 'is-invalid' : '' }}"
             id="email"
             name="email"
             aria-describedby="emailHelp"
             placeholder="Enter email"
-            value="{{ session.getFlash('old')['email'] | default('') }}"
+            value="{{ segment.getFlash('old')['email'] | default('') }}"
             required
             autofocus
         />
-        {% if session.getFlash('errors')['email'] is defined %}
+        {% if segment.getFlash('errors')['email'] is defined %}
         <small class="form-text text-danger">
-            {{ session.getFlash("errors")["email"][0] }}
+            {{ segment.getFlash("errors")["email"][0] }}
         </small>
         {% endif %}
     </div>
@@ -26,16 +26,16 @@ cardtitle %} Login {% endblock cardtitle %} {% block content %}
         <label for="password">Password</label>
         <input
             type="password"
-            class="form-control {{ (session.getFlash('errors')['password'] is defined) ? 'is-invalid' : '' }}"
+            class="form-control {{ (segment.getFlash('errors')['password'] is defined) ? 'is-invalid' : '' }}"
             id="password"
             name="password"
             placeholder="Password"
             required
             autocomplete="off"
         />
-        {% if session.getFlash('errors')['password'] is defined %}
+        {% if segment.getFlash('errors')['password'] is defined %}
         <small class="form-text text-danger">{{
-            session.getFlash("errors")["password"][0]
+            segment.getFlash("errors")["password"][0]
         }}</small>
         {% endif %}
     </div>

@@ -13,7 +13,7 @@ use FSB\Middleware \{
     HeadersMiddleware, VerifyCsrfTokenMiddleware, AuraSessionMiddleware, AuthMiddleware, GuestMiddleware, SanitizeInputMiddleware, AuraRouter
 };
 use FSB\Session \{
-    Session, SessionHelper
+    Session
 };
 use App\Controller \{
     HomeController, LoginController, UserController
@@ -38,7 +38,9 @@ use Middleland\Dispatcher;
 use Aura\Router\RouterContainer;
 use FSB\Router\Router;
 use FSB\Middleware\SetRequestAttributesMiddleware;
-// use FSB\Middleware\Matcher\Method;
+use Middlewares\ClientIp;
+use Middlewares\ErrorHandler;
+use FSB\Middleware\ErrorRequestHandler;
 
 $session = require(CONFIG_PATH . 'session.php');
 $view = require(CONFIG_PATH . 'view.php');
@@ -83,8 +85,6 @@ return [
     /* Session */
     SessionFactory::class => create(),
     'sessionfactory' => get(SessionFactory::class),
-    Session::class => create()->constructor(get('sessionfactory'), $session),
-    'session' => get(Session::class),
     AuraSessionMiddleware::class => create()->constructor(get('sessionfactory'), $session)->method('name', $session['name']),
     'mw_session' => get(AuraSessionMiddleware::class),
 
@@ -100,13 +100,15 @@ return [
     VerifyCsrfTokenMiddleware::class => create()->constructor(get('responsefactory')),
     'csrf' => get(VerifyCsrfTokenMiddleware::class),
 
-    /* Sanitize Input */
-    SanitizeInputMiddleware::class => create(),
-    'sanitize' => get(SanitizeInputMiddleware::class),
+    /* Client IP */
+    ClientIp::class => create(),
+    'client-ip' => get(ClientIp::class),
 
-    /* Method Matcher */
-    // Method::class => create(),
-    // 'method' => get(Method::class),
+    /* HTTP Error Handler */
+    ErrorRequestHandler::class => create()->constructor(get('template')),
+    'error-request' => get(ErrorRequestHandler::class),
+    ErrorHandler::class => create()->constructor(get('error-request')),
+    'error-handler' => get(ErrorHandler::class),
 
     /* COMMAND BUS */
     ClassNameExtractor::class => create(),
@@ -126,23 +128,13 @@ return [
     Twig_Environment::class => create()->constructor(get('loader'), $view)->method('addExtension', get('apptwigext')),
     'twig' => get(Twig_Environment::class),
     TwigTemplate::class => create()->constructor(get('twig')),
-    TemplateInterface::class => get(TwigTemplate::class),
-    'template' => get(TemplateInterface::class),
-    AppTwigExtension::class => create()->constructor(get('session'), get('request')),
+    'template' => get(TwigTemplate::class),
+    AppTwigExtension::class => create()->constructor(get('sessionfactory')),
     'apptwigext' => get(AppTwigExtension::class),
 
     /* INPUT VALIDATOR */
-    // Validator::class => function (ContainerInterface $c) {
-    //     $request = $c->get('request');
-    //     $post = $request->getParsedBody();
-    //     foreach ($post as $key => $value) {
-    //         $post[$key] = test_input($post[$key]);
-    //         $post[$key] = filter_input(INPUT_POST, $key, FILTER_SANITIZE_STRING);
-    //     }
-    //     return new Validator($post);
-    // },
-    Validator::class => create(),
-    'validator' => get(Validator::class),
+    // Validator::class => create(),
+    // 'validator' => get(Validator::class),
 
     /* CONTROLLERS */
     HomeController::class => create()->constructor(get('responsefactory'), get('template'), get('commandbus'), get('validator')),

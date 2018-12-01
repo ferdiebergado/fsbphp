@@ -10,6 +10,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Zend\Diactoros\Response\RedirectResponse;
 use Middlewares\Utils\Traits\HasResponseFactory;
+use Middlewares\HttpErrorException;
 
 class AuraRouter implements MiddlewareInterface
 {
@@ -54,19 +55,37 @@ class AuraRouter implements MiddlewareInterface
             $failedRoute = $matcher->getFailedRoute();
             switch ($failedRoute->failedRule) {
                 case 'Aura\Router\Rule\Allows':
-                    return $this->createResponse(405)
-                        ->withHeader('Allow', implode(', ', $failedRoute->allows)); // 405 METHOD NOT ALLOWED
+                    throw HttpErrorException::create(405, [
+                        'request' => $request,
+                        'headers' => [
+                            'Allow' => implode(', ', $failedRoute->allows)
+                        ]
+                    ]);
+                    // return $this->createResponse(405)
+                    //     ->withHeader('Allow', implode(', ', $failedRoute->allows)); // 405 METHOD NOT ALLOWED
                 case 'Aura\Router\Rule\Accepts':
-                    return $this->createResponse(406); // 406 NOT ACCEPTABLE
+                    throw HttpErrorException::create(406, [
+                        'request' => $request,
+                        'headers' => [
+                            'Accept' => implode(', ', $failedRoute->accepts)
+                        ]
+                    ]);                
+                    // return $this->createResponse(406); // 406 NOT ACCEPTABLE
                 case 'Aura\Router\Rule\Host':
                 case 'Aura\Router\Rule\Path':
-                    return $this->createResponse(404); // 404 NOT FOUND
+                    throw HttpErrorException::create(404, [
+                        'request' => $request
+                    ]);                   
+                    // return $this->createResponse(404); // 404 NOT FOUND
                 case 'FSB\Router\Rule\Guest':
                     return new RedirectResponse('/');
                 case 'FSB\Router\Rule\Auth':
                     return new RedirectResponse('/login');
                 default:
-                    return $this->createResponse(500); // 500 INTERNAL SERVER ERROR
+                    throw HttpErrorException::create(500, [
+                        'request' => $request
+                    ]);                                   
+                    // return $this->createResponse(500); // 500 INTERNAL SERVER ERROR
             }
         }
 

@@ -10,7 +10,10 @@ class User extends BaseModel
         'email',
         'password',
         'last_login',
-        'role'
+        'ipv4',
+        'ipv6',
+        'user_agent',
+        'role',
     ];
 
     protected $hidden = [

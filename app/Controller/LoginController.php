@@ -62,7 +62,10 @@ class LoginController extends Controller
             return new RedirectResponse($this->loginPath);
         }
 
-        $login = new LoginCommand($session, $segment, $body);
+        $ip = $request->getAttribute('client-ip');
+        $ssl = $request->getAttribute('ssl');
+        $userAgent = $request->getAttribute('user-agent');
+        $login = new LoginCommand($session, $segment, $ip, $userAgent, $ssl, $body);
         $loggedIn = $this->commandBus->handle($login);
 
         if ($loggedIn) {

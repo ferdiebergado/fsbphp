@@ -2,27 +2,31 @@
 
 namespace App\View\Template\Twig\Extension;
 
-use FSB\Session\Session;
 use DebugBar\StandardDebugBar;
 use DebugBar\Bridge\Twig\TraceableTwigEnvironment;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Container\ContainerInterface;
+use Aura\Session\SessionFactory;
 
 class AppTwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsInterface
 {
-    protected $session;
-    protected $request;
+    protected $sessionFactory;
 
-    public function __construct(Session $session, ServerRequestInterface $request)
+    public function __construct(SessionFactory $sessionFactory)
     {
-        $this->session = $session;
-        $this->request = $request;
+        $this->sessionFactory = $sessionFactory;
     }
 
     public function getGlobals()
     {
+        $session = $this->sessionFactory->newInstance($_COOKIE);
+        $segment = $session->getSegment('FSB');
+        $csrfField = '<input type="hidden" name="__csrf_value" value="'
+            . htmlspecialchars($session->getCsrfToken()->getValue(), ENT_QUOTES, 'UTF-8')
+            . '"></input>';
         $globals = [
-            'session' => $this->session->getSegment(),
-            'csrf' => $this->session->getCsrfField(),
+            'segment' => $segment,
+            'csrf' => $csrfField,
         ];
 
         if (DEBUG_MODE) {

@@ -347,24 +347,26 @@ if (!function_exists('convert')) {
  * Gets the user ip address
  * @return string The user ip address
  */
-function getUserIp()
-{
-    if (getenv('HTTP_CLIENT_IP')) {
-        $userIp = getenv('HTTP_CLIENT_IP');
-    } else if (getenv('HTTP_X_FORWARDED_FOR')) {
-        $userIp = getenv('HTTP_X_FORWARDED_FOR');
-    } else if (getenv('HTTP_X_FORWARDED')) {
-        $userIp = getenv('HTTP_X_FORWARDED');
-    } else if (getenv('HTTP_FORWARDED_FOR')) {
-        $userIp = getenv('HTTP_FORWARDED_FOR');
-    } else if (getenv('HTTP_FORWARDED')) {
-        $userIp = getenv('HTTP_FORWARDED');
-    } else if (getenv('REMOTE_ADDR')) {
-        $userIp = getenv('REMOTE_ADDR');
-    } else {
-        $userIp = 'UNKNOWN';
+if (!function_exists('getUserIp')) {
+    function getUserIp($server)
+    {
+        if (isset($server['HTTP_CLIENT_IP'])) {
+            $userIp = $server['HTTP_CLIENT_IP'];
+        } else if (isset($server['HTTP_X_FORWARDED_FOR'])) {
+            $userIp = $server['HTTP_X_FORWARDED_FOR'];
+        } else if (isset($server['HTTP_X_FORWARDED'])) {
+            $userIp = $server['HTTP_X_FORWARDED'];
+        } else if (isset($server['HTTP_FORWARDED_FOR'])) {
+            $userIp = $server['HTTP_FORWARDED_FOR'];
+        } else if (isset($server['HTTP_FORWARDED'])) {
+            $userIp = $server['HTTP_FORWARDED'];
+        } else if (isset($server['REMOTE_ADDR'])) {
+            $userIp = $server['REMOTE_ADDR'];
+        } else {
+            $userIp = 'UNKNOWN';
+        }
+        return $userIp;
     }
-    return $userIp;
 }
 
 /**

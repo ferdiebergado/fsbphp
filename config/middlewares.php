@@ -1,10 +1,11 @@
 <?php
 
 return [
+    'error-handler',
     'headers',
     'content-type',
+    'client-ip',
     'mw_session',
-    'set-attributes',
     'mw_router',
     'csrf',
     'requesthandler'

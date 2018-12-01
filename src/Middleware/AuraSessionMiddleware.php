@@ -76,6 +76,49 @@ class AuraSessionMiddleware implements MiddlewareInterface
             $session->setCookieParams($this->config['cookie']);
         }
 
+        $segment = $session->getSegment('FSB');
+
+        $server = $request->getServerParams();
+        $userIp = $request->getAttribute('client-ip');
+        $userAgent = $server['HTTP_USER_AGENT'];
+        $ssl = $server['REQUEST_SCHEME'] === 'https' ? true : false;
+        
+        // prevent session hijacking
+        if ($segment->get('IPaddress') != $userIp || $segment->get('userAgent') != $userAgent) {
+            $session->clear();
+            $session->destroy();
+            $segment = $session->getSegment('FSB');
+            $segment->set('IPaddress', $userIp);
+            $segment->set('userAgent', $userAgent);
+            $segment->set('isSsl', $ssl);
+            $session->regenerateId();
+        }
+
+        // regenerate session id and set cookie secure flag when switching between http and https
+        if ($segment->get('isSsl') !== $ssl) {
+            $segment->set('isSsl', $ssl);
+            $session->setCookieParams(['secure' => $ssl]);
+            $session->regenerateId();
+        }
+
+        // record session activity
+        if (!$segment->get('start_time')) {
+            $segment->set('start_time', time());
+        }
+        $segment->set('last_activity', time());
+
+        // delete session expired also server side
+        if ($segment->get('start_time') < (strtotime('-1 hours')) || $segment->get('last_activity') < (strtotime('-20 mins'))) {
+            $session->clear();
+            $session->destroy();
+        }
+
+        $segment->keepFlash();
+        $user = $segment->get('user');
+        $request = $request->withAttribute('user', $user);
+        $request = $request->withAttribute('segment', $segment);
+        $request = $request->withAttribute('user-agent', $userAgent);
+        $request = $request->withAttribute('ssl', $ssl);
         $request = $request->withAttribute($this->attribute, $session);
 
         return $handler->handle($request);

@@ -9,7 +9,6 @@ class LoginHandler
 {
     public function handle(LoginCommand $login)
     {
-        $session = $login->session;
         $segment = $login->segment;
         $body = $login->body;
         $user = User::where('email', $body['email'])->first();
@@ -20,10 +19,21 @@ class LoginHandler
                     $newhash = password_hash($password, PASSWORD_DEFAULT);
                     $user->update(['password' => $newhash]);
                 }
-                $user->update(['last_login' => date('Y-m-d H:i:s')]);
+                $ip = $login->ip;
+                $userAgent = $login->userAgent;
+                $user->update([
+                    'last_login' => date('Y-m-d H:i:s'),
+                    'ipv4' => $ip,
+                    'user_agent' => $userAgent
+                ]);
                 $user = $user->toArray();
                 cache_remember('user_' . $user['id'], 30, $user);
+                $session = $login->session;
                 $session->regenerateId();
+                $ssl = $login->ssl;
+                $segment->set('IPaddress', $ip);
+                $segment->set('userAgent', $userAgent);
+                $segment->set('isSsl', $ssl);
                 $segment->set('user', $user);
                 $segment->setFlash('status', 'You are now logged in!');
                 return true;

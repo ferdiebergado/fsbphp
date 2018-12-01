@@ -28,7 +28,7 @@
             <!-- Right Side Of Navbar -->
             <ul class="navbar-nav ml-auto">
                 <!-- Authentication Links -->
-                {# @guest #} {% if session.get('user').email is empty %}
+                {# @guest #} {% if segment.get('user').email is empty %}
 
                 <li class="nav-item">
                     <a class="nav-link" href="/login"> Login </a>
@@ -61,7 +61,7 @@
                             width="32"
                             height="24"
                         />
-                        {{ session.get("user").email|default('') }}
+                        {{ segment.get("user").email|default('') }}
                         <span class="caret"></span>
                     </a>
 

@@ -14,14 +14,15 @@ DI:
 - try league/container (REJECTED!: no lazing loading)
 
 dev:
-- debugbar (REJECTED!)
+- debugbar (DONE!)
 
 - tactician (DONE!)
 
-* Convert functions to classes
+* Convert functions to classes (PARTIAL)
 
-* redirect response 
+* redirect response (DONE!)
 
-
-
-
+Cache
+config
+flysystem
+router resource map 
