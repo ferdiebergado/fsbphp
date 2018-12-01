@@ -2,8 +2,8 @@
 
 namespace App\Model;
 
-use Illuminate\Database\Eloquent\Model;
 use FSB\Container;
+use Illuminate\Database\Eloquent\Model;
 
 class BaseModel extends Model
 {

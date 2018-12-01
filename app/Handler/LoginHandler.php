@@ -5,7 +5,7 @@ namespace App\Handler;
 use App\Model\User;
 use App\Command\LoginCommand;
 
-class LoginHandler
+class LoginHandler extends Handler
 {
     public function handle(LoginCommand $login)
     {
@@ -21,13 +21,16 @@ class LoginHandler
                 }
                 $ip = $login->ip;
                 $userAgent = $login->userAgent;
-                $user->update([
+                $update = [
                     'last_login' => date('Y-m-d H:i:s'),
                     'ipv4' => $ip,
                     'user_agent' => $userAgent
-                ]);
+                ];
+                $user->update($update);
                 $user = $user->toArray();
-                // cache_remember('user_' . $user['id'], 30, $user);
+                $key = 'user_' . $user['id'];
+                $this->cache->delete($key);
+                $this->cache->recall($key, 30, $user);
                 $session = $login->session;
                 $session->regenerateId();
                 $ssl = $login->ssl;

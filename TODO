@@ -21,10 +21,14 @@ dev:
 * Convert functions to classes (PARTIAL)
 
 * redirect response (DONE!)
+config (DONE!)
+Cache (DONE!)
 
-Cache
-config
 flysystem
 router resource map 
 
 write interfaces for each component
+
+monolog 
+swiftmailer
+

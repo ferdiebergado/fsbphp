@@ -1,5 +1,8 @@
 <?php
 
+use function DI \{
+    create, get
+};
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Container\ContainerInterface;
 use Zend\Diactoros \{
@@ -7,10 +10,10 @@ use Zend\Diactoros \{
 };
 use FSB\Container;
 use Middlewares \{
-    ContentType, RequestHandler
+    ContentType, RequestHandler, ClientIp, ErrorHandler
 };
 use FSB\Middleware \{
-    HeadersMiddleware, VerifyCsrfTokenMiddleware, AuraSessionMiddleware, AuraRouter
+    HeadersMiddleware, VerifyCsrfTokenMiddleware, AuraSessionMiddleware, AuraRouter, ErrorRequestHandler
 };
 use FSB\Session \{
     Session
@@ -30,21 +33,15 @@ use League\Tactician\Handler\CommandNameExtractor\ClassNameExtractor;
 use App\Handler \{
     LogoutHandler, LoginHandler, UserShowHandler
 };
-use function DI \{
-    create, get
-};
 use Middleland\Dispatcher;
 use Aura\Router\RouterContainer;
 use FSB\Router\Router;
-use FSB\Middleware\SetRequestAttributesMiddleware;
-use Middlewares\ClientIp;
-use Middlewares\ErrorHandler;
-use FSB\Middleware\ErrorRequestHandler;
 use Noodlehaus\Config;
-use App\Model\User;
-use App\Model\BaseModel;
 use Dotenv\Dotenv;
 use Illuminate\Database\Capsule\Manager as Capsule;
+use Apix\Cache\Files;
+use Apix\Cache\Factory as CacheFactory;
+use FSB\Cache\Cache;
 
 return [
 
@@ -60,7 +57,6 @@ return [
             'app',
             'cache',
             'database',
-            'filesystem',
             'handlers',
             'headers',
             'middlewares',
@@ -74,8 +70,6 @@ return [
         return new Config($files);
     },
     'config' => get(Config::class),
-
-
 
     /* PSR-7 HTTP MESSAGE IMPLEMENTATION */
     ServerRequestFactory::class => create(),
@@ -141,6 +135,16 @@ return [
     Capsule::class => create(),
     'capsule' => get(Capsule::class),
 
+    /* CACHE */
+    Files::class => function (Config $config) {
+        return new Files($config->get('cache'));
+    },
+    'filecache' => get(Files::class),
+    // CacheFactory::class => create()->method('getTaggablePool', get('filecache')),
+    // 'cache' => get(CacheFactory::class),
+    Cache::class => create()->constructor(get('filecache')),
+    'cache' => get(Cache::class),
+
     /* COMMAND BUS */
     ClassNameExtractor::class => create(),
     'extractor' => get(ClassNameExtractor::class),
@@ -177,7 +181,7 @@ return [
 
     /* COMMAND HANDLERS */
     LogoutHandler::class => create(),
-    LoginHandler::class => create(),
-    UserShowHandler::class => create(),
+    LoginHandler::class => create()->constructor(get('cache')),
+    UserShowHandler::class => create()->constructor(get('cache')),
 
 ];
