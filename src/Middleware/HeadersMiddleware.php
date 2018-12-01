@@ -1,17 +1,25 @@
 <?php
 namespace FSB\Middleware;
 
-use Psr\Http\Message\ServerRequestInterface;
+use Noodlehaus\Config;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
 class HeadersMiddleware implements MiddlewareInterface
 {
+    private $config;
+
+    public function __construct(Config $config)
+    {
+        $this->config = $config;
+    }
+
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface
     {
         $response = $handler->handle($request);
-        $headers = require(CONFIG_PATH . 'headers.php');
+        $headers = $this->config->get('headers');
         foreach ($headers as $key => $value) {
             $response = $response->withHeader($key, $value);
         }

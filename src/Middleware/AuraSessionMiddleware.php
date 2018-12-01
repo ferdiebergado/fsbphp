@@ -8,6 +8,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Noodlehaus\Config;
 
 class AuraSessionMiddleware implements MiddlewareInterface
 {
@@ -26,6 +27,7 @@ class AuraSessionMiddleware implements MiddlewareInterface
      */
     private $attribute = 'session';
 
+
     protected $config;
 
     /**
@@ -33,7 +35,7 @@ class AuraSessionMiddleware implements MiddlewareInterface
      *
      * @param SessionFactory|null $factory
      */
-    public function __construct(SessionFactory $factory = null, $config = [])
+    public function __construct(SessionFactory $factory = null, Config $config)
     {
         $this->factory = $factory;
         $this->config = $config;
@@ -67,16 +69,18 @@ class AuraSessionMiddleware implements MiddlewareInterface
         $factory = $this->factory ? : new SessionFactory();
         $session = $factory->newInstance($request->getCookieParams());
 
+        $session->setName($this->config->get('session.name'));
+
         if ($this->name !== null) {
             $session->setName($this->name);
         }
 
         if ($this->config !== null) {
-            $session->setSavePath($this->config['save_path']);
-            $session->setCookieParams($this->config['cookie']);
+            $session->setSavePath($this->config->get('session.save_path'));
+            $session->setCookieParams($this->config->get('session.cookie'));
         }
 
-        $segment = $session->getSegment('FSB');
+        $segment = $session->getSegment($this->config->get('session.segment'));
 
         $server = $request->getServerParams();
         $userIp = $request->getAttribute('client-ip');

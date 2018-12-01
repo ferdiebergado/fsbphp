@@ -5,8 +5,6 @@ namespace App\Controller;
 use Psr\Http\Message \{
     ResponseInterface, ServerRequestInterface
 };
-use App\Model\User;
-use FSB\Session\SessionHelper;
 use App\Command \{
     LogoutCommand, LoginCommand
 };

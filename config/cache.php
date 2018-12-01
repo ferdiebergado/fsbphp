@@ -1,6 +1,8 @@
 <?php
 return [
-    'enabled' => true,
-    'path' => '',
-    'expire' => 30 //minutes
+    'cache' => [
+        'enabled' => true,
+        'path' => '',
+        'expire' => 30 //minutes
+    ]
 ];

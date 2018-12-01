@@ -62,7 +62,9 @@ $router->start();
  * @var array $middlewares
  * @var \Relay\Relay $dispatcher
  * @var \Psr\Http\Message\ResponseInterface $response */
-$middlewares = include(CONFIG_PATH . 'middlewares.php');
+// $middlewares = include(CONFIG_PATH . 'middlewares.php');
+$config = $container->get('config');
+$middlewares = $config->get('middlewares');
 $resolver = function ($entry) use ($container) {
     return $container->get($entry);
 };

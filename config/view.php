@@ -6,5 +6,7 @@
  */
 
 return [
-    'cache' => CACHE_PATH . 'views'
+    'view' => [
+        'cache' => CACHE_PATH . 'views'
+    ]
 ];

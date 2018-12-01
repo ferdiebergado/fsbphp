@@ -10,7 +10,7 @@ use Middlewares \{
     ContentType, RequestHandler
 };
 use FSB\Middleware \{
-    HeadersMiddleware, VerifyCsrfTokenMiddleware, AuraSessionMiddleware, AuthMiddleware, GuestMiddleware, SanitizeInputMiddleware, AuraRouter
+    HeadersMiddleware, VerifyCsrfTokenMiddleware, AuraSessionMiddleware, AuraRouter
 };
 use FSB\Session \{
     Session
@@ -30,7 +30,6 @@ use League\Tactician\Handler\CommandNameExtractor\ClassNameExtractor;
 use App\Handler \{
     LogoutHandler, LoginHandler, UserShowHandler
 };
-use Valitron\Validator;
 use function DI \{
     create, get
 };
@@ -41,10 +40,11 @@ use FSB\Middleware\SetRequestAttributesMiddleware;
 use Middlewares\ClientIp;
 use Middlewares\ErrorHandler;
 use FSB\Middleware\ErrorRequestHandler;
-
-$session = require(CONFIG_PATH . 'session.php');
-$view = require(CONFIG_PATH . 'view.php');
-$handlermap = require(CONFIG_PATH . 'handlers.php');
+use Noodlehaus\Config;
+use App\Model\User;
+use App\Model\BaseModel;
+use Dotenv\Dotenv;
+use Illuminate\Database\Capsule\Manager as Capsule;
 
 return [
 
@@ -52,14 +52,44 @@ return [
     Container::class => create(),
     'container' => get(Container::class),
 
+    /* Config */
+    Dotenv::class => create()->constructor(BASE_PATH),
+    'env' => get(Dotenv::class),
+    Config::class => function () {
+        $filenames = [
+            'app',
+            'cache',
+            'database',
+            'filesystem',
+            'handlers',
+            'headers',
+            'middlewares',
+            'session',
+            'view'
+        ];
+        $ext = '.php';
+        foreach ($filenames as $file) {
+            $files[] = __DIR__ . '/' . $file . $ext;
+        }
+        return new Config($files);
+    },
+    'config' => get(Config::class),
+
+
+
     /* PSR-7 HTTP MESSAGE IMPLEMENTATION */
     ServerRequestFactory::class => create(),
     'serverrequest' => get(ServerRequestFactory::class),
     ResponseFactory::class => create(),
     'responsefactory' => get(ResponseFactory::class),
-    'request' => function (ContainerInterface $c) {
-        $serverrequest = $c->get('serverrequest');
-        return $serverrequest->fromGlobals();
+    'request' => function (ServerRequestFactory $serverRequest) {
+        return $serverRequest::fromGlobals(
+            $_SERVER,
+            $_GET,
+            $_POST,
+            $_COOKIE,
+            $_FILES
+        );
     },    
 
     /* Router */
@@ -79,18 +109,15 @@ return [
     'requesthandler' => get(RequestHandler::class),
 
     /* Headers */
-    HeadersMiddleware::class => create(),
+    HeadersMiddleware::class => create()->constructor(get('config')),
     'headers' => get(HeadersMiddleware::class),
 
     /* Session */
     SessionFactory::class => create(),
     'sessionfactory' => get(SessionFactory::class),
-    AuraSessionMiddleware::class => create()->constructor(get('sessionfactory'), $session)->method('name', $session['name']),
+    AuraSessionMiddleware::class => create()->constructor(get('sessionfactory'), get('config')),
+    // ->method('name', $session['name']),
     'mw_session' => get(AuraSessionMiddleware::class),
-
-    /* Authenticated User */
-    SetRequestAttributesMiddleware::class => create(),
-    'set-attributes' => get(SetRequestAttributesMiddleware::class),
 
     /* Content-Type Negotiation */
     ContentType::class => create(),
@@ -110,12 +137,18 @@ return [
     ErrorHandler::class => create()->constructor(get('error-request')),
     'error-handler' => get(ErrorHandler::class),
 
+    /* ORM */
+    Capsule::class => create(),
+    'capsule' => get(Capsule::class),
+
     /* COMMAND BUS */
     ClassNameExtractor::class => create(),
     'extractor' => get(ClassNameExtractor::class),
     HandleInflector::class => create(),
     'inflector' => get(HandleInflector::class),
-    ContainerLocator::class => create()->constructor(get('container'), $handlermap),
+    ContainerLocator::class => function (ContainerInterface $c, Config $config) {
+        return new ContainerLocator($c, $config->get('handlers'));
+    },
     'locator' => get(ContainerLocator::class),
     CommandHandlerMiddleware::class => create()->constructor(get('extractor'), get('locator'), get('inflector')),
     'commandhandler' => get(CommandHandlerMiddleware::class),
@@ -125,21 +158,22 @@ return [
     /* TEMPLATE ENGINE */
     Twig_Loader_Filesystem::class => create()->constructor(VIEW_PATH),
     'loader' => get(Twig_Loader_Filesystem::class),
-    Twig_Environment::class => create()->constructor(get('loader'), $view)->method('addExtension', get('apptwigext')),
+    Twig_Environment::class => function (Twig_Loader_Filesystem $loader, Config $config, AppTwigExtension $twigExt) {
+        $view = $config->get('view');
+        $twig = new Twig_Environment($loader, $view);
+        $twig->addExtension($twigExt);
+        return $twig;
+    },
     'twig' => get(Twig_Environment::class),
     TwigTemplate::class => create()->constructor(get('twig')),
     'template' => get(TwigTemplate::class),
     AppTwigExtension::class => create()->constructor(get('sessionfactory')),
     'apptwigext' => get(AppTwigExtension::class),
 
-    /* INPUT VALIDATOR */
-    // Validator::class => create(),
-    // 'validator' => get(Validator::class),
-
     /* CONTROLLERS */
-    HomeController::class => create()->constructor(get('responsefactory'), get('template'), get('commandbus'), get('validator')),
-    LoginController::class => create()->constructor(get('responsefactory'), get('template'), get('commandbus'), get('validator')),
-    UserController::class => create()->constructor(get('responsefactory'), get('template'), get('commandbus'), get('validator')),
+    HomeController::class => create()->constructor(get('template'), get('commandbus')),
+    LoginController::class => create()->constructor(get('template'), get('commandbus')),
+    UserController::class => create()->constructor(get('template'), get('commandbus')),
 
     /* COMMAND HANDLERS */
     LogoutHandler::class => create(),

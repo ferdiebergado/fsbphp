@@ -3,19 +3,19 @@
 namespace App\Model;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Capsule\Manager as Capsule;
-use Dotenv\Dotenv;
+use FSB\Container;
 
 class BaseModel extends Model
 {
     public function __construct()
     {
-        $env = new Dotenv(BASE_PATH);
-        $env->load();
-        $capsule = new Capsule;
-        $config = require(CONFIG_PATH . 'database.php');
-        $capsule->addConnection($config);
-        $capsule->bootEloquent();
         parent::__construct();
+        $container = new Container();
+        $env = $container->get('env');
+        $env->load();
+        $config = $container->get('config');
+        $capsule = $container->get('capsule');
+        $capsule->addConnection($config->get('database'));
+        $capsule->bootEloquent();
     }
 }

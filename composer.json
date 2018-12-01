@@ -42,6 +42,7 @@
     },
     "require": {
         "filp/whoops": "^2.3",
+        "hassankhan/config": "^2.0",
         "illuminate/database": "^5.7",
         "league/tactician": "^1.0",
         "league/tactician-container": "^2.0",
@@ -56,6 +57,7 @@
         "twig/twig": "^2.5",
         "vlucas/phpdotenv": "^2.5",
         "vlucas/valitron": "^1.4",
+        "wshafer/psr11-flysystem": "^2.1",
         "zendframework/zend-diactoros": "^2.0",
         "zendframework/zend-httphandlerrunner": "^1.0"
     }

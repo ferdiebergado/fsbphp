@@ -27,7 +27,7 @@ class LoginHandler
                     'user_agent' => $userAgent
                 ]);
                 $user = $user->toArray();
-                cache_remember('user_' . $user['id'], 30, $user);
+                // cache_remember('user_' . $user['id'], 30, $user);
                 $session = $login->session;
                 $session->regenerateId();
                 $ssl = $login->ssl;
