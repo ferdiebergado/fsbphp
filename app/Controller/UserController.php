@@ -12,9 +12,7 @@ class UserController extends Controller
 {
     public function browse(ServerRequestInterface $request) : ResponseInterface
     {
-        // $browseUsers = new UserBrowseCommand();
         $users = User::paginate(10);
-
         $data = json_encode($users->toArray(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         return $this->view('home', compact('data'));
     }
@@ -25,5 +23,13 @@ class UserController extends Controller
         $show = new UserShowCommand($id);
         $data = $this->commandBus->handle($show);
         return $this->view("home", compact('data'));
+    }
+
+    public function edit(ServerRequestInterface $request) : ResponseInterface
+    {
+        $id = (int)$request->getAttribute('id');
+        $user = User::find($id);
+        $data = $user->toArray();
+        return $this->view('users/edit', compact('data'));
     }
 }

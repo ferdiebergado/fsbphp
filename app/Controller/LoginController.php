@@ -46,6 +46,7 @@ class LoginController extends Controller
         $body = $request->getParsedBody();
         $session = $request->getAttribute('session');
         $segment = $request->getAttribute('segment');
+        $segment->setFlash('old', $body);
         $validator = new Validator($body);
         $validator
             ->rule('required', ['email', 'password'])
@@ -54,7 +55,6 @@ class LoginController extends Controller
         $invalid = "Invalid input.";
         if (!$validator->validate()) {
             $errors = $validator->errors();
-            $segment->setFlash('old', $body);
             $segment->setFlash('errors', $errors);
             $segment->setFlash('error', $invalid);
             return new RedirectResponse($this->loginPath);

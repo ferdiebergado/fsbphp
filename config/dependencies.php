@@ -57,6 +57,18 @@ use Zend\HttpHandlerRunner\Emitter \{
 use Relay\Relay;
 use FSB\Emitter\ConditionalEmitter;
 use Monolog\Handler\SwiftMailerHandler;
+// use Bernard\Driver\FlatFileDriver;
+// use Bernard\Serializer;
+// use Bernard\Producer;
+// use Bernard\QueueFactory\PersistentFactory;
+// use Bernard\Consumer;
+// use Symfony\Component\EventDispatcher\EventDispatcher;
+// use Bernard\Router\SimpleRouter;
+// use Bernard\EventListener\ErrorLogSubscriber;
+// use Bernard\EventListener\FailureSubscriber;
+// use Bernard\Symfony\ContainerAwareRouter;
+use Illuminate\Queue\Capsule\Manager as Queue;
+use Middlewares\Whoops;
 
 return [
     
@@ -83,7 +95,7 @@ return [
     'prettypagehandler' => get(PrettyPageHandler::class),
     PlainTextHandler::class => create()->constructor(get('stream-logger')),
     'plaintexthandler' => get(PlainTextHandler::class),
-    ExceptionHandler::class => create()->constructor(get('whoops'), get('prettypagehandler'), get('plaintexthandler'), get('logger'), get('mailer'), get('config'), get('template')),
+    ExceptionHandler::class => create()->constructor(get('whoops'), get('prettypagehandler'), get('plaintexthandler'), get('logger'), get('mailer'), get('config'), get('template'), get('queue')),
     'exception-handler' => get(ExceptionHandler::class),
 
     /* CONFIG */
@@ -209,6 +221,29 @@ return [
     'smtp-transport' => get(Swift_SmtpTransport::class),
     Swift_Mailer::class => create()->constructor(get('smtp-transport')),
     'mailer' => get(Swift_Mailer::class),
+
+    /* QUEUE */
+    // Serializer::class => create(),
+    // 'queue-serializer' => get(Serializer::class),
+    // ErrorLogSubscriber::class => create(),
+    // 'errorlog-subscriber' => get(ErrorLogSubscriber::class),
+    // FailureSubscriber::class => create()->constructor(get('queue-producer')),
+    // 'failure-subscriber' => get(FailureSubscriber::class),
+    // EventDispatcher::class => create()->method('addSubscriber', get('errorlog-subscriber'))->method('addSubscriber', get('failure-subscriber')),
+    // 'event-dispatcher' => get(EventDispatcher::class),
+    // FlatFileDriver::class => create()->constructor(CACHE_PATH . 'queue'),
+    // 'queue-driver' => get(FlatFileDriver::class),
+    // PersistentFactory::class => create()->constructor(get('queue-driver'), get('queue-serializer')),
+    // 'queue-factory' => get(PersistentFactory::class),
+    // Producer::class => create()->constructor(get('queue-factory'), get('event-dispatcher')),
+    // 'queue-producer' => get(Producer::class),
+    // ContainerAwareRouter::class => function (ContainerInterface $c, Config $config) {
+    //     $receivers = $config->get('queue.receivers');
+    //     return new ContainerAwareRouter($c, $receivers);
+    // },
+    // 'queue-router' => get(ContainerAwareRouter::class),
+    // Consumer::class => create()->constructor(get('queue-router'), get('event-dispatcher')),
+    // 'queue-consumer' => get(Consumer::class),
 
     /* ORM */
     Capsule::class => create(),

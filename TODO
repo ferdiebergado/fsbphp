@@ -25,10 +25,10 @@ config (DONE!)
 Cache (DONE!)
 monolog (DONE!)
 router resource map (DONE!)
+swiftmailer (DONE!)
 
-flysystem
-write interfaces for each component
-swiftmailer
 queue 
-
-
+flysystem
+ratelimiting
+write interfaces for each component
+explicitly declare built-in functions 

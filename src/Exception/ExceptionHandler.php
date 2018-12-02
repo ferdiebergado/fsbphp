@@ -40,6 +40,7 @@ class ExceptionHandler
     public function register()
     {
         if (DEBUG_MODE) {
+            ini_set('display_errors', 1);
             error_reporting(E_ALL);
             $this->whoops->pushHandler($this->prettypagehandler);
         } else {
@@ -48,6 +49,7 @@ class ExceptionHandler
             $whoops->writeToOutput(false);
             $plaintexthandler = $this->plaintexthandler;
             $logger = $this->logger;
+
             $this->whoops->pushHandler(function ($e) use ($whoops, $plaintexthandler, $logger) {
                 $whoops->pushHandler($plaintexthandler);
                 $body = $whoops->handleException($e);
@@ -65,10 +67,6 @@ class ExceptionHandler
                     ->setTo($mail['email'])
                     ->setBody($body, 'text/html');
                 $mailer->send($message);
-                $code = 500;
-                $message = "An error occurred.";
-                // return new RedirectResponse('/');
-                // return this->view('layouts/errors', compact('code', 'message'));
             });
         }
         $this->whoops->register();

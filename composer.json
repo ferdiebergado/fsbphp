@@ -45,6 +45,7 @@
         "filp/whoops": "^2.3",
         "hassankhan/config": "^2.0",
         "illuminate/database": "^5.7",
+        "illuminate/pagination": "^5.7",
         "league/tactician": "^1.0",
         "league/tactician-container": "^2.0",
         "middlewares/aura-router": "^1.1",
