@@ -37,7 +37,7 @@ if (PHP_SAPI === 'cli-server' && $_SERVER['SCRIPT_FILENAME'] !== __FILE__) {
 
 /* Global constants */
 define('FSB_TIME', microtime(true));
-define('DEBUG_MODE', true);
+define('DEBUG_MODE', false);
 define('DS', DIRECTORY_SEPARATOR);
 define('BASE_PATH', __DIR__ . DS . '..' . DS);
 define('CONFIG_PATH', BASE_PATH . 'config' . DS);

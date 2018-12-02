@@ -46,15 +46,17 @@ use FSB\Router\Router;
 use FSB\Router\Rule\Auth;
 use FSB\Router\Rule\Guest;
 use Whoops\Run;
-use Whoops\Handler\PrettyPageHandler;
-use Whoops\Handler\PlainTextHandler;
+use Whoops\Handler \{
+    PrettyPageHandler, PlainTextHandler
+};
 use Monolog\Handler\StreamHandler;
 use FSB\Exception\ExceptionHandler;
-use Zend\HttpHandlerRunner\Emitter\SapiEmitter;
-use Zend\HttpHandlerRunner\Emitter\SapiStreamEmitter;
+use Zend\HttpHandlerRunner\Emitter \{
+    SapiEmitter, SapiStreamEmitter, EmitterStack
+};
 use Relay\Relay;
-use Zend\HttpHandlerRunner\Emitter\EmitterStack;
 use FSB\Emitter\ConditionalEmitter;
+use Monolog\Handler\SwiftMailerHandler;
 
 return [
     
@@ -81,9 +83,7 @@ return [
     'prettypagehandler' => get(PrettyPageHandler::class),
     PlainTextHandler::class => create()->constructor(get('stream-logger')),
     'plaintexthandler' => get(PlainTextHandler::class),
-    ExceptionHandler::class => function (Run $whoops, PrettyPageHandler $prettypage, PlainTextHandler $plaintext) {
-        return new ExceptionHandler($whoops, $prettypage, $plaintext);
-    },
+    ExceptionHandler::class => create()->constructor(get('whoops'), get('prettypagehandler'), get('plaintexthandler'), get('logger'), get('mailer'), get('config'), get('template')),
     'exception-handler' => get(ExceptionHandler::class),
 
     /* CONFIG */
@@ -97,6 +97,7 @@ return [
             'handlers',
             'headers',
             'http',
+            'mail',
             'middlewares',
             'session',
             'view'
@@ -196,6 +197,18 @@ return [
     'error-request' => get(ErrorRequestHandler::class),
     ErrorHandler::class => create()->constructor(get('error-request')),
     'error-handler' => get(ErrorHandler::class),
+
+    /* MAIL */
+    Swift_SmtpTransport::class => function (Config $config) {
+        $mail = $config->get('mail');
+        $swift = new Swift_SmtpTransport($mail['host'], $mail['port']);
+        $swift->setUsername($mail['username']);
+        $swift->setPassword($mail['password']);
+        return $swift;
+    },
+    'smtp-transport' => get(Swift_SmtpTransport::class),
+    Swift_Mailer::class => create()->constructor(get('smtp-transport')),
+    'mailer' => get(Swift_Mailer::class),
 
     /* ORM */
     Capsule::class => create(),

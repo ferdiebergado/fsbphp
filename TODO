@@ -23,12 +23,12 @@ dev:
 * redirect response (DONE!)
 config (DONE!)
 Cache (DONE!)
+monolog (DONE!)
+router resource map (DONE!)
 
 flysystem
-router resource map 
-
 write interfaces for each component
-
-monolog 
 swiftmailer
+queue 
+
 
