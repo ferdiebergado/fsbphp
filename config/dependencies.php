@@ -53,6 +53,8 @@ use FSB\Exception\ExceptionHandler;
 use Zend\HttpHandlerRunner\Emitter\SapiEmitter;
 use Zend\HttpHandlerRunner\Emitter\SapiStreamEmitter;
 use Relay\Relay;
+use Zend\HttpHandlerRunner\Emitter\EmitterStack;
+use FSB\Emitter\ConditionalEmitter;
 
 return [
     
@@ -94,6 +96,7 @@ return [
             'database',
             'handlers',
             'headers',
+            'http',
             'middlewares',
             'session',
             'view'
@@ -146,8 +149,14 @@ return [
     /* RESPONSE EMITTER */
     SapiEmitter::class => create(),
     'emitter' => get(SapiEmitter::class),
-    SapiStreamEmitter::class => create(),
+    SapiStreamEmitter::class => function (Config $config) {
+        return new SapiStreamEmitter($config->get('http.maxbufferlength'));
+    },
     'stream-emitter' => get(SapiStreamEmitter::class),
+    EmitterStack::class => create(),
+    'emitter-stack' => get(EmitterStack::class),
+    ConditionalEmitter::class => create()->constructor(get('stream-emitter')),
+    'conditional-emitter' => get(ConditionalEmitter::class),
 
     /* MIDDLEWARES */
 

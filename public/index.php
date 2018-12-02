@@ -47,6 +47,12 @@ $dispatcher = $container->get('dispatcher');
 $response = $dispatcher->handle($request);
 
 /** Send the response to the client 
- * @var \Zend\HttpHandlerRunner\Emitter\SapiEmitter $emitter */
-$emitter = $container->get('emitter');
-return $emitter->emit($response);
+ * @var \Zend\HttpHandlerRunner\Emitter\EmitterStack $stack
+ * @var \Zend\HttpHandlerRunner\Emitter\SapiEmitter $sapiEmitter 
+ * @var \FSB\Emitter\ConditionalEmitter $conditionalEmitter */
+$stack = $container->get('emitter-stack');
+$sapiEmitter = $container->get('emitter');
+$conditionalEmitter = $container->get('conditional-emitter');
+$stack->push($sapiEmitter);
+$stack->push($conditionalEmitter);
+return $stack->emit($response);
