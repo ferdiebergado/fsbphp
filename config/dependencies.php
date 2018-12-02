@@ -34,22 +34,57 @@ use App\Handler \{
     LogoutHandler, LoginHandler, UserShowHandler
 };
 use Middleland\Dispatcher;
-use Aura\Router\RouterContainer;
-use FSB\Router\Router;
 use Noodlehaus\Config;
 use Dotenv\Dotenv;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Apix\Cache\Files;
 use Apix\Cache\Factory as CacheFactory;
 use FSB\Cache\Cache;
+use Monolog\Logger;
+use Aura\Router\RouterContainer;
+use FSB\Router\Router;
+use FSB\Router\Rule\Auth;
+use FSB\Router\Rule\Guest;
+use Whoops\Run;
+use Whoops\Handler\PrettyPageHandler;
+use Whoops\Handler\PlainTextHandler;
+use Monolog\Handler\StreamHandler;
+use FSB\Exception\ExceptionHandler;
+use Zend\HttpHandlerRunner\Emitter\SapiEmitter;
+use Zend\HttpHandlerRunner\Emitter\SapiStreamEmitter;
+use Relay\Relay;
 
 return [
-
+    
     /* DEPENDENCY INJECTION CONTAINER */
     Container::class => create(),
     'container' => get(Container::class),
 
-    /* Config */
+    /* LOGGER */
+    Logger::class => create()->constructor('main'),
+    'logger' => get(Logger::class),
+    StreamHandler::class => create()->constructor(LOG_FILE),
+    'stream-handler' => get(StreamHandler::class),
+    'stream-logger' => function (Logger $logger, StreamHandler $handler) {
+        return $logger->pushHandler($handler);
+    },
+    'security-logger' => function (Logger $logger) {
+        return $logger->withName('security-logger');
+    },
+
+    /* EXCEPTION HANDLER */
+    Run::class => create(),
+    'whoops' => get(Run::class),
+    PrettyPageHandler::class => create(),
+    'prettypagehandler' => get(PrettyPageHandler::class),
+    PlainTextHandler::class => create()->constructor(get('stream-logger')),
+    'plaintexthandler' => get(PlainTextHandler::class),
+    ExceptionHandler::class => function (Run $whoops, PrettyPageHandler $prettypage, PlainTextHandler $plaintext) {
+        return new ExceptionHandler($whoops, $prettypage, $plaintext);
+    },
+    'exception-handler' => get(ExceptionHandler::class),
+
+    /* CONFIG */
     Dotenv::class => create()->constructor(BASE_PATH),
     'env' => get(Dotenv::class),
     Config::class => function () {
@@ -86,16 +121,38 @@ return [
         );
     },    
 
-    /* Router */
+    /* ROUTER */
     RouterContainer::class => create(),
-    'routercontainer' => get(RouterContainer::class),
-    Router::class => create()->constructor(get('routercontainer')),
+    'router-container' => get(RouterContainer::class),
+    Auth::class => create(),
+    'auth' => get(Auth::class),
+    Guest::class => create(),
+    'guest' => get(Guest::class),
+    Router::class => function (RouterContainer $routerContainer, ContainerInterface $c) {
+        return new Router($routerContainer, $c->get('auth'), $c->get('guest'));
+    },
     'router' => get(Router::class),
+
+    /* DISPATCHER */
+    Relay::class => function (ContainerInterface $c, Config $config) {
+        $middlewares = $config->get('middlewares');
+        $resolver = function ($entry) use ($c) {
+            return $c->get($entry);
+        };
+        return new Relay($middlewares, $resolver);
+    },
+    'dispatcher' => get(Relay::class),
+
+    /* RESPONSE EMITTER */
+    SapiEmitter::class => create(),
+    'emitter' => get(SapiEmitter::class),
+    SapiStreamEmitter::class => create(),
+    'stream-emitter' => get(SapiStreamEmitter::class),
 
     /* MIDDLEWARES */
 
     /* Routes */
-    AuraRouter::class => create()->constructor(get('routercontainer'))->method('responseFactory', get('responsefactory')),
+    AuraRouter::class => create()->constructor(get('router-container'))->method('responseFactory', get('responsefactory')),
     'mw_router' => get(AuraRouter::class),
 
     /* Request-Handler */

@@ -2,32 +2,42 @@
 
 namespace FSB\Exception;
 
-use Whoops\Handler\PrettyPageHandler;
+use Whoops\Run;
+use Whoops\Handler\HandlerInterface;
 
 /* Register the error handler */
 class ExceptionHandler
 {
-    public function __invoke()
+    private $whoops;
+    private $prettyagehandler;
+    private $plaintexthandler;
+
+    public function __construct(Run $whoops, HandlerInterface $prettypagehandler, HandlerInterface $plaintexthandler)
     {
-        $whoops = new Whoops\Run;
+        $this->whoops = $whoops;
+        $this->prettypagehandler = $prettypagehandler;
+        $this->plaintexthandler = $plaintexthandler;
+    }
 
-        $pagehandler = new PrettyPageHandler;
-
+    public function register()
+    {
         if (DEBUG_MODE) {
             error_reporting(E_ALL);
-            $whoops->pushHandler($pagehandler);
+            $this->whoops->pushHandler($this->prettypagehandler);
         } else {
-            $whoops->pushHandler(function ($e) use ($whoops, $pagehandler) {
-                $whoops->allowQuit(false);
-                $whoops->writeToOutput(false);
-                $whoops->pushHandler($pagehandler);
-                $body = $whoops->handleException($e);
+            $this->whoops->pushHandler($this->plaintexthandler);
+    // $whoops->pushHandler(function ($e) use ($whoops, $plaintexthandler) {
+        // $whoops->allowQuit(false);
+        // $whoops->writeToOutput(false);
+        // $whoops->pushHandler($prettyagehandler);
+        // $body = $whoops->handleException($e);
+        // $whoops->pushHandler($plaintexthandler);
         // $app = require(CONFIG_PATH . 'app.php');
         // Core\Mail::send($app['author_email'], $app['name'] . ' Error Exception', $body);
-                logger($e->getMessage(), 2);
-        // require VIEW_PATH . '500.php';
-            });
+        // logger($e->getMessage(), 2);
+        // require VIEW_PATH . 'errors/500.php';
+    // });
         }
-        $whoops->register();
+        $this->whoops->register();
     }
 }

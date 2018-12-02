@@ -22,56 +22,31 @@ define('LOG_FILE', CACHE_PATH . 'app_' . date('Y') . '.log');
 /* Autoload libraries */
 require BASE_PATH . 'vendor' . DS . 'autoload.php';
 
-/* Register the error handler */
-use Whoops\Handler\PrettyPageHandler;
-
-$whoops = new Whoops\Run;
-$pagehandler = new PrettyPageHandler;
-
-if (DEBUG_MODE) {
-    error_reporting(E_ALL);
-    $whoops->pushHandler($pagehandler);
-} else {
-    $whoops->pushHandler(function ($e) use ($whoops, $pagehandler) {
-        $whoops->allowQuit(false);
-        $whoops->writeToOutput(false);
-        $whoops->pushHandler($pagehandler);
-        $body = $whoops->handleException($e);
-        // $app = require(CONFIG_PATH . 'app.php');
-        // Core\Mail::send($app['author_email'], $app['name'] . ' Error Exception', $body);
-        logger($e->getMessage(), 2);
-        require VIEW_PATH . 'errors/500.php';
-    });
-}
-$whoops->register();
-
 /** Instantiate the DI Container
  * @var Psr\Container\ContainerInterface $c */
 $container = new FSB\Container();
 
-/** Create a Server Request
- * @var Psr\Http\Message\ServerRequestInterface $request */
-$request = $container->get('request');
+/** Register the Exception Handler 
+ * @var \FSB\Exception\ExceptionHandler $exceptionHandler */
+$exceptionHandler = $container->get('exception-handler');
+$exceptionHandler->register();
 
 /** Load the application routes  
  * @var \FSB\Router\Router $router */
 $router = $container->get('router');
 $router->start();
 
+/** Create a Server Request
+ * @var Psr\Http\Message\ServerRequestInterface $request */
+$request = $container->get('request');
+
 /** Dispatch the middleware stack
- * @var array $middlewares
  * @var \Relay\Relay $dispatcher
  * @var \Psr\Http\Message\ResponseInterface $response */
-// $middlewares = include(CONFIG_PATH . 'middlewares.php');
-$config = $container->get('config');
-$middlewares = $config->get('middlewares');
-$resolver = function ($entry) use ($container) {
-    return $container->get($entry);
-};
-$dispatcher = new Relay\Relay($middlewares, $resolver);
+$dispatcher = $container->get('dispatcher');
 $response = $dispatcher->handle($request);
 
 /** Send the response to the client 
  * @var \Zend\HttpHandlerRunner\Emitter\SapiEmitter $emitter */
-$emitter = new Zend\HttpHandlerRunner\Emitter\SapiEmitter;
+$emitter = $container->get('emitter');
 return $emitter->emit($response);

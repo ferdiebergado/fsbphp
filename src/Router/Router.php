@@ -2,24 +2,37 @@
 
 namespace FSB\Router;
 
-use FSB\Router\Rule\Auth;
+use Aura\Router\Route;
+use FSB\Router\Map\ResourceMap;
 use Aura\Router\RouterContainer;
-use FSB\Router\Rule\Guest;
+use FSB\Router\Route\ModelRoute;
+use Aura\Router\Rule\RuleInterface;
 
 class Router
 {
     private $router;
+    private $rules;
 
-    public function __construct(RouterContainer $router)
+    public function __construct(RouterContainer $router, RuleInterface ...$rules)
     {
         $this->router = $router;
+        $this->rules = $rules;
     }
 
     public function start()
     {
-        $rules = $this->router->getRuleIterator();
-        $rules->append(new Guest());
-        $rules->append(new Auth());
+        $this->router->setMapFactory(function () {
+            return new ResourceMap(new Route());
+        });
+        $this->router->setRouteFactory(function () {
+            return new ModelRoute();
+        });
+        if (isset($this->rules)) {
+            $rules = $this->router->getRuleIterator();
+            foreach ($this->rules as $rule) {
+                $rules->append($rule);
+            }
+        }
         if (!DEBUG_MODE) {
 
             $this->router->setMapBuilder(function ($map) {
