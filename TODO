@@ -26,9 +26,13 @@ Cache (DONE!)
 monolog (DONE!)
 router resource map (DONE!)
 swiftmailer (DONE!)
+queue (UNNECESSARY!)
 
-queue 
 flysystem
 ratelimiting
 write interfaces for each component
 explicitly declare built-in functions 
+pipeline 
+enhance session
+events and listeners 
+

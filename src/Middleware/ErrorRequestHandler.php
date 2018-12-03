@@ -40,7 +40,9 @@ class ErrorRequestHandler implements RequestHandlerInterface
         ];
 
         $context = $error->getContext();
-        $requestContext = $context['request'];
+        if (isset($context['request'])) {
+            $requestContext = $context['request'];
+        }
         $headers = [];
         if (isset($context['headers'])) {
             $headers = $context['headers'];

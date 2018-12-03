@@ -1,25 +1,23 @@
 <?php
+declare (strict_types = 1);
 
-namespace FSB\Exception;
+namespace FSB\Middleware;
 
 use Whoops\Run;
 use Monolog\Logger;
 use Noodlehaus\Config;
-use Whoops\Handler\Handler;
-use App\View\Template\ViewTrait;
+use Middlewares\HttpErrorException;
 use Whoops\Handler\HandlerInterface;
+use Whoops\Handler\PlainTextHandler;
 use Whoops\Handler\PrettyPageHandler;
-use Monolog\Handler\SwiftMailerHandler;
-use Whoops\Handler\JsonResponseHandler;
-use App\View\Template\TemplateInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use Zend\Diactoros\Response\RedirectResponse;
-use Monolog\Handler\HandlerInterface as LogHandlerInterface;
 
-/* Register the error handler */
-class ExceptionHandler
+class WhoopsMiddleware implements MiddlewareInterface
 {
-    use ViewTrait;
-
     private $whoops;
     private $prettypagehandler;
     private $plaintexthandler;
@@ -28,7 +26,7 @@ class ExceptionHandler
     private $config;
     private $template;
 
-    public function __construct(Run $whoops, HandlerInterface $prettypagehandler, HandlerInterface $plaintexthandler, Logger $logger, \Swift_Mailer $mailer, Config $config, TemplateInterface $template)
+    public function __construct(Run $whoops, HandlerInterface $prettypagehandler, HandlerInterface $plaintexthandler, Logger $logger, \Swift_Mailer $mailer, Config $config)
     {
         $this->whoops = $whoops;
         $this->prettypagehandler = $prettypagehandler;
@@ -36,13 +34,14 @@ class ExceptionHandler
         $this->logger = $logger;
         $this->mailer = $mailer;
         $this->config = $config;
-        $this->template = $template;
     }
 
-    public function register()
+    /**
+     * Process a server request and return a response.
+     */
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface
     {
         $this->whoops->register();
-        $this->whoops->pushHandler(new JsonResponseHandler());
         if (DEBUG_MODE) {
             ini_set('display_errors', 1);
             error_reporting(E_ALL);
@@ -50,7 +49,6 @@ class ExceptionHandler
         } else {
             $this->whoops->allowQuit(false);
             $this->whoops->writeToOutput(false);
-            $this->whoops->sendHttpCode(true);
             $plaintexthandler = $this->plaintexthandler;
             $logger = $this->logger;
             $this->whoops->pushHandler(function ($exception, $inspector, $whoops) use ($plaintexthandler, $logger) {
@@ -70,10 +68,14 @@ class ExceptionHandler
                     ->setTo($mail['email'])
                     ->setBody($body, 'text/html');
                 $mailer->send($message);
-                return;
-                // header('Content-Type: text/html');
-                // echo $this->template->render('layouts/errors.html.twig');
+                // return new RedirectResponse('/');
+                $whoops->handleShutdown(function () {
+                    throw HttpErrorException::create(500, [
+                        'request' => $request
+                    ]);
+                });
             });
         }
+        return $handler->handle($request);
     }
 }

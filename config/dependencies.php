@@ -72,6 +72,7 @@ use Middlewares\Whoops;
 use Enqueue\Fs\FsConnectionFactory;
 use App\Job\SwiftQueueSpool;
 use FSB\Queue\MailQueue;
+use FSB\Middleware\WhoopsMiddleware;
 
 return [
     
@@ -173,8 +174,20 @@ return [
     'emitter-stack' => get(EmitterStack::class),
     ConditionalEmitter::class => create()->constructor(get('stream-emitter')),
     'conditional-emitter' => get(ConditionalEmitter::class),
-
+    
     /* MIDDLEWARES */
+
+    /* Exception Handler */
+    // Whoops::class => create()->constructor(get('whoops'))->method('handlerContainer', get('container'))->method('responseFactory', get('responsefactory')),
+
+    // WhoopsMiddleware::class => create()->constructor(get('whoops'), get('prettypagehandler'), get('plaintexthandler'), get('logger'), get('mailer'), get('config')),
+    // 'mw_whoops' => get(WhoopsMiddleware::class),
+    
+    /* HTTP Error Handler */
+    ErrorRequestHandler::class => create()->constructor(get('template')),
+    'error-request' => get(ErrorRequestHandler::class),
+    ErrorHandler::class => create()->constructor(get('error-request')),
+    'error-handler' => get(ErrorHandler::class),
 
     /* Routes */
     AuraRouter::class => create()->constructor(get('router-container'))->method('responseFactory', get('responsefactory')),
@@ -207,11 +220,6 @@ return [
     ClientIp::class => create(),
     'client-ip' => get(ClientIp::class),
 
-    /* HTTP Error Handler */
-    ErrorRequestHandler::class => create()->constructor(get('template')),
-    'error-request' => get(ErrorRequestHandler::class),
-    ErrorHandler::class => create()->constructor(get('error-request')),
-    'error-handler' => get(ErrorHandler::class),
 
     /* MAIL */
     Swift_SmtpTransport::class => function (Config $config) {
