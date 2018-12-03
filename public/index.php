@@ -74,6 +74,11 @@ $request = $container->get('request');
 $dispatcher = $container->get('dispatcher');
 $response = $dispatcher->handle($request);
 
+/** Consume Queue
+ * @var \FSB\Queue\MailQueue $mailQueue */
+// $mailQueue = $container->get('mail-queue');
+// $mailQueue->consume();
+
 /** Send the response to the client 
  * @var \Zend\HttpHandlerRunner\Emitter\EmitterStack $stack
  * @var \Zend\HttpHandlerRunner\Emitter\SapiEmitter $sapiEmitter 

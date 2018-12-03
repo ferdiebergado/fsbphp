@@ -69,6 +69,9 @@ use Monolog\Handler\SwiftMailerHandler;
 // use Bernard\Symfony\ContainerAwareRouter;
 use Illuminate\Queue\Capsule\Manager as Queue;
 use Middlewares\Whoops;
+use Enqueue\Fs\FsConnectionFactory;
+use App\Job\SwiftQueueSpool;
+use FSB\Queue\MailQueue;
 
 return [
     
@@ -95,7 +98,7 @@ return [
     'prettypagehandler' => get(PrettyPageHandler::class),
     PlainTextHandler::class => create()->constructor(get('stream-logger')),
     'plaintexthandler' => get(PlainTextHandler::class),
-    ExceptionHandler::class => create()->constructor(get('whoops'), get('prettypagehandler'), get('plaintexthandler'), get('logger'), get('mailer'), get('config'), get('template'), get('queue')),
+    ExceptionHandler::class => create()->constructor(get('whoops'), get('prettypagehandler'), get('plaintexthandler'), get('logger'), get('mailer'), get('config'), get('template')),
     'exception-handler' => get(ExceptionHandler::class),
 
     /* CONFIG */
@@ -218,11 +221,29 @@ return [
         $swift->setPassword($mail['password']);
         return $swift;
     },
-    'smtp-transport' => get(Swift_SmtpTransport::class),
-    Swift_Mailer::class => create()->constructor(get('smtp-transport')),
-    'mailer' => get(Swift_Mailer::class),
+    'swift-smtp-transport' => get(Swift_SmtpTransport::class),
+    SwiftQueueSpool::class => create()->constructor(get('queue')),
+    'swift-queue-spool' => get(SwiftQueueSpool::class),
+    Swift_SpoolTransport::class => create()->constructor(get('swift-queue-spool')),
+    'swift-spool-transport' => get(Swift_SpoolTransport::class),
+    Swift_Mailer::class => create()->constructor(get('swift-spool-transport')),
+    'spool-mailer' => function (ContainerInterface $c) {
+        return new Swift_Mailer($c->get('swift-spool-transport'));
+    },
+    'mailer' => function (ContainerInterface $c) {
+        return new Swift_Mailer($c->get('swift-smtp-transport'));
+    },
 
     /* QUEUE */
+    FsConnectionFactory::class => function (Config $config) {
+        $connectionFactory = new FsConnectionFactory($config->get('queue'));
+        $context = $connectionFactory->createContext();
+        return $context;
+    },
+    'queue' => get(FsConnectionFactory::class),
+    MailQueue::class => create()->constructor(get('swift-spool-transport'), get('swift-smtp-transport')),
+    'mail-queue' => get(MailQueue::class),
+
     // Serializer::class => create(),
     // 'queue-serializer' => get(Serializer::class),
     // ErrorLogSubscriber::class => create(),
