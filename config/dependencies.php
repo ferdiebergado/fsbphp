@@ -8,29 +8,29 @@ use Psr\Container\ContainerInterface;
 use Zend\Diactoros \{
     ServerRequestFactory, ResponseFactory
 };
-use FSB\Container;
+use Bergado\Infrastructure\Container\Container;
 use Middlewares \{
     ContentType, RequestHandler, ClientIp, ErrorHandler
 };
-use FSB\Middleware \{
+use Bergado\Infrastructure\Middleware \{
     HeadersMiddleware, VerifyCsrfTokenMiddleware, AuraSessionMiddleware, AuraRouter, ErrorRequestHandler
 };
-use FSB\Session \{
+use Bergado\Infrastructure\Session \{
     Session
 };
-use App\Controller \{
+use Bergado\Presentation\Web\Pub\Controller \{
     HomeController, LoginController, UserController
 };
-use App\View\Template\Twig\TwigTemplate;
-use App\View\Template\TemplateInterface;
-use App\View\Template\Twig\Extension\AppTwigExtension;
+use Bergado\Presentation\Web\Pub\Template\Twig\TwigTemplate;
+use Bergado\Core\Application\Service\TemplateInterface;
+use Bergado\Presentation\Web\Pub\Template\Twig\Extension\GlobalsTwigExtension;
 use Aura\Session\SessionFactory;
 use League\Tactician\Container\ContainerLocator;
 use League\Tactician\Handler\CommandHandlerMiddleware;
 use League\Tactician\Handler\MethodNameInflector\HandleInflector;
 use League\Tactician\CommandBus;
 use League\Tactician\Handler\CommandNameExtractor\ClassNameExtractor;
-use App\Handler \{
+use Bergado\Presentation\Web\Pub\Controller\Handler \{
     LogoutHandler, LoginHandler, UserShowHandler
 };
 use Middleland\Dispatcher;
@@ -39,24 +39,24 @@ use Dotenv\Dotenv;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Apix\Cache\Files;
 use Apix\Cache\Factory as CacheFactory;
-use FSB\Cache\Cache;
+use Bergado\Infrastructure\Cache\Cache;
 use Monolog\Logger;
 use Aura\Router\RouterContainer;
-use FSB\Router\Router;
-use FSB\Router\Rule\Auth;
-use FSB\Router\Rule\Guest;
+use Bergado\Infrastructure\Router\Router;
+use Bergado\Infrastructure\Router\Rule\Auth;
+use Bergado\Infrastructure\Router\Rule\Guest;
 use Whoops\Run;
 use Whoops\Handler \{
     PrettyPageHandler, PlainTextHandler
 };
 use Monolog\Handler\StreamHandler;
-use FSB\Exception\ExceptionHandler;
+use Bergado\Infrastructure\Exception\ExceptionHandler;
 use Zend\HttpHandlerRunner\Emitter \{
     SapiEmitter, SapiStreamEmitter, EmitterStack
 };
 use Relay\Relay;
-use FSB\Emitter\ConditionalEmitter;
-use Monolog\Handler\SwiftMailerHandler;
+use Bergado\Infrastructure\Emitter\ConditionalEmitter;
+// use Monolog\Handler\SwiftMailerHandler;
 // use Bernard\Driver\FlatFileDriver;
 // use Bernard\Serializer;
 // use Bernard\Producer;
@@ -68,11 +68,10 @@ use Monolog\Handler\SwiftMailerHandler;
 // use Bernard\EventListener\FailureSubscriber;
 // use Bernard\Symfony\ContainerAwareRouter;
 use Illuminate\Queue\Capsule\Manager as Queue;
-use Middlewares\Whoops;
-use Enqueue\Fs\FsConnectionFactory;
-use App\Job\SwiftQueueSpool;
-use FSB\Queue\MailQueue;
-use FSB\Middleware\WhoopsMiddleware;
+// use Enqueue\Fs\FsConnectionFactory;
+// use App\Job\SwiftQueueSpool;
+// use Bergado\Queue\MailQueue;
+// use Bergado\Middleware\WhoopsMiddleware;
 
 return [
     
@@ -220,7 +219,6 @@ return [
     ClientIp::class => create(),
     'client-ip' => get(ClientIp::class),
 
-
     /* MAIL */
     Swift_SmtpTransport::class => function (Config $config) {
         $mail = $config->get('mail');
@@ -230,27 +228,27 @@ return [
         return $swift;
     },
     'swift-smtp-transport' => get(Swift_SmtpTransport::class),
-    SwiftQueueSpool::class => create()->constructor(get('queue')),
-    'swift-queue-spool' => get(SwiftQueueSpool::class),
-    Swift_SpoolTransport::class => create()->constructor(get('swift-queue-spool')),
-    'swift-spool-transport' => get(Swift_SpoolTransport::class),
-    Swift_Mailer::class => create()->constructor(get('swift-spool-transport')),
-    'spool-mailer' => function (ContainerInterface $c) {
-        return new Swift_Mailer($c->get('swift-spool-transport'));
-    },
+    // SwiftQueueSpool::class => create()->constructor(get('queue')),
+    // 'swift-queue-spool' => get(SwiftQueueSpool::class),
+    // Swift_SpoolTransport::class => create()->constructor(get('swift-queue-spool')),
+    // 'swift-spool-transport' => get(Swift_SpoolTransport::class),
+    // Swift_Mailer::class => create()->constructor(get('swift-spool-transport')),
+    // 'spool-mailer' => function (ContainerInterface $c) {
+    //     return new Swift_Mailer($c->get('swift-spool-transport'));
+    // },
     'mailer' => function (ContainerInterface $c) {
         return new Swift_Mailer($c->get('swift-smtp-transport'));
     },
 
     /* QUEUE */
-    FsConnectionFactory::class => function (Config $config) {
-        $connectionFactory = new FsConnectionFactory($config->get('queue'));
-        $context = $connectionFactory->createContext();
-        return $context;
-    },
-    'queue' => get(FsConnectionFactory::class),
-    MailQueue::class => create()->constructor(get('swift-spool-transport'), get('swift-smtp-transport')),
-    'mail-queue' => get(MailQueue::class),
+    // FsConnectionFactory::class => function (Config $config) {
+    //     $connectionFactory = new FsConnectionFactory($config->get('queue'));
+    //     $context = $connectionFactory->createContext();
+    //     return $context;
+    // },
+    // 'queue' => get(FsConnectionFactory::class),
+    // MailQueue::class => create()->constructor(get('swift-spool-transport'), get('swift-smtp-transport')),
+    // 'mail-queue' => get(MailQueue::class),
 
     // Serializer::class => create(),
     // 'queue-serializer' => get(Serializer::class),
@@ -305,7 +303,7 @@ return [
     /* TEMPLATE ENGINE */
     Twig_Loader_Filesystem::class => create()->constructor(VIEW_PATH),
     'loader' => get(Twig_Loader_Filesystem::class),
-    Twig_Environment::class => function (Twig_Loader_Filesystem $loader, Config $config, AppTwigExtension $twigExt) {
+    Twig_Environment::class => function (Twig_Loader_Filesystem $loader, Config $config, GlobalsTwigExtension $twigExt) {
         $view = $config->get('view');
         $twig = new Twig_Environment($loader, $view);
         $twig->addExtension($twigExt);
@@ -314,8 +312,8 @@ return [
     'twig' => get(Twig_Environment::class),
     TwigTemplate::class => create()->constructor(get('twig')),
     'template' => get(TwigTemplate::class),
-    AppTwigExtension::class => create()->constructor(get('sessionfactory')),
-    'apptwigext' => get(AppTwigExtension::class),
+    GlobalsTwigExtension::class => create()->constructor(get('sessionfactory')),
+    'globalstwigext' => get(GlobalsTwigExtension::class),
 
     /* CONTROLLERS */
     HomeController::class => create()->constructor(get('template'), get('commandbus')),

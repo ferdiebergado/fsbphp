@@ -9,7 +9,7 @@
  * @return \Aura\Router\Map
  * */
 
-$namespace = "App\\Controller\\";
+$namespace = "Bergado\\Presentation\\Web\\Pub\\Controller\\";
 
 $map->get('home', '/', [$namespace . 'HomeController', 'index']);
 $map->get('login', '/login', [$namespace . 'LoginController', 'show'])->auth(['loggedIn' => false]);

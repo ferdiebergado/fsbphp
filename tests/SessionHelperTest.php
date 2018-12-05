@@ -1,7 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use FSB\Container;
+use Bergado\Container;
 
 class SessionHelperTest extends TestCase
 {

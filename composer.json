@@ -11,11 +11,10 @@
     ],
     "autoload": {
         "psr-4": {
-            "FSB\\": "src\\",
-            "App\\": "app\\"
+            "Bergado\\": "src\\"
         },
         "files": [
-            "src/functions.php"
+            "src/Infrastructure/Functions/functions.php"
         ]
     },
     "autoload-dev": {
