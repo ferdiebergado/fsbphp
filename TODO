@@ -26,15 +26,17 @@ Cache (DONE!)
 monolog (DONE!)
 router resource map (DONE!)
 swiftmailer (DONE!)
+explicitly declare built-in functions (DONE!)
+
 queue (UNNECESSARY!)
 
 flysystem
 ratelimiting
-write interfaces for each component:
+DECOUPLE: write interfaces for each component:
 - Router 
 
-explicitly declare built-in functions 
 pipeline 
 enhance session
 events and listeners 
 migrations
+migrate all constants to config 
